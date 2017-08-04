@@ -1,0 +1,16 @@
+<div class="multilink-items">
+    {% for id,title in field.items() %}
+        <div class="multilink-item">
+            <input
+                    type="checkbox"
+                    name="{{ field.name }}[{{ id }}]"
+                    class="input checkbox {{ field.classForAdminInput() }}"
+                    value="1"
+                    {% if field.isAttached(id) %}
+                        checked
+                    {% endif %}
+            >
+            <span class="multilink-item-label">{{ title }}</span>
+        </div>
+    {% endfor %}
+</div>

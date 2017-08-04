@@ -1,0 +1,10 @@
+<input
+  type="checkbox"
+  name="{{ field.name }}"
+  class="input checkbox {{ field.classForAdminInput() }}"
+  style="{{ field.styleForAdminInput()|raw }}"
+  value="1"
+  {% if field.checked() %}
+      checked
+  {% endif %}
+>

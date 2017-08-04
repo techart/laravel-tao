@@ -1,0 +1,11 @@
+<form action="" method="post">
+    {{ csrf_field() }}
+    
+    {% if tabs %}
+        {{ view('table ~ form.tabs') }}
+    {% else %}
+        {{ view('table ~ form.fields', { tab: '#', tab_label: '#'} ) }}
+    {% endif %}
+    
+    <button type="submit" class="btn btn-primary"><i class="icon-ok icon-white"></i> {{ submit_text }}</button>
+</form>

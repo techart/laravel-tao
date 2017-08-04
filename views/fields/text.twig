@@ -1,0 +1,7 @@
+<textarea
+  type="text"
+  name="{{ field.name }}"
+  class="input text {{ field.classForAdminInput() }}"
+  style="{{ field.styleForAdminInput()|raw }}"
+>{{ item[field.name] }}
+</textarea>

@@ -1,0 +1,27 @@
+{
+    "name": "techart/laravel-tao",
+    "description": "Techart extensions for Laravel",
+    "version" : "3.0.2",
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "Techart",
+            "homepage": "http://web-techart.ru/"
+        }
+    ],
+    "autoload" : {
+        "psr-4": {
+            "TAO\\": "src/TAO"
+        }
+    },
+    "require": {
+        "PHP": ">=5.5",
+        "ramsey/uuid": "^3.6",
+        "curl/curl": "~1.7",
+        "doctrine/dbal": "^2.5",
+        "laravel/framework": "5.4.*",
+        "laravel/tinker": "~1.0",
+        "ramsey/uuid": "^3.6",
+        "rcrowe/twigbridge": "^0.9.4"
+    }
+}

@@ -1,0 +1,31 @@
+{% set group = false %}
+{% for field in fields %}
+    {% if tab == '#' or tab == field.adminTab() %}
+        {% if field.adminGroupLabel() != group %}
+        
+            {% if group != false %}
+                </fieldset></div>
+            {% endif %}
+            
+            {% set group = field.adminGroupLabel() %}
+            
+            {% if group=='#' or tab_label == group %}
+                <div class="block-simple form-horizontal">
+            {% else %}
+                <div class="block form-horizontal">
+                    <div class="navbar navbar-inner block-header">
+                        <div class="muted pull-left">{{ group }}</div>
+                    </div> 
+            {%endif %}
+            <fieldset class="admin">
+        {% endif %}
+    
+        <div class="control-group">
+            <label class="control-label" for="{{ field.name }}">{{ field.labelInAdminForm()|raw }}</label>
+            <div class="controls">{{ field.renderInput()|raw }}</div>
+        </div>
+    {% endif %}
+{% endfor %}
+{% if group != false %}
+    </fieldset></div>
+{% endif %}

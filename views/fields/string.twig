@@ -1,0 +1,7 @@
+<input
+  type="text"
+  name="{{ field.name }}"
+  class="input string {{ field.classForAdminInput() }}"
+  style="{{ field.styleForAdminInput()|raw }}"
+  value="{{ item[field.name] }}"
+>

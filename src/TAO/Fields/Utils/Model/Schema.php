@@ -1,0 +1,126 @@
+<?php
+
+namespace TAO\Fields\Utils\Model;
+
+use Illuminate\Database\Schema\Blueprint;
+
+/**
+ * Class Schema
+ * @package TAO\Fields\Utils\Model
+ */
+trait Schema
+{
+
+    /**
+     * @return $this
+     */
+    public function updateSchemaIfNecessary()
+    {
+        $table = $this->getTable();
+        if (app()->taoFields->schemaWasUpdated($table)) {
+            return $this;
+        }
+        if (app()->tao->classModified($this, false)) {
+            $this->updateSchema();
+        }
+        app()->taoFields->schemaUpdated($table);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function dbSchema()
+    {
+        return \Schema::connection($this->getConnectionName());
+    }
+
+    /**
+     * @param \Closure $closure
+     * @return mixed
+     */
+    public function tableSchema(\Closure $closure)
+    {
+        return $this->dbSchema()->table($this->getTable(), $closure);
+    }
+
+    /**
+     * @param $name
+     * @return mixed
+     */
+    public function hasColumn($name)
+    {
+        return $this->dbSchema()->hasColumn($this->getTable(), $name);
+    }
+
+    /**
+     * @param array $columns
+     * @return mixed
+     */
+    public function hasColumns(array $columns)
+    {
+        return $this->dbSchema()->hasColumns($this->getTable(), $columns);
+    }
+
+    /**
+     * @param $name
+     * @return mixed
+     */
+    public function getColumnType($name)
+    {
+        return $this->dbSchema()->getColumnType($this->getTable(), $name);
+    }
+
+    /**
+     * @param $name
+     * @return null
+     */
+    public function getIndexInfo($name)
+    {
+        $indexes = $this->getConnection()->getDoctrineSchemaManager()->listTableIndexes($this->getTable());
+        return isset($indexes[$name]) ? $indexes[$name] : null;
+    }
+
+    /**
+     *
+     */
+    public function updateSchema()
+    {
+        $tableName = $this->getTable();
+        if (!$this->dbSchema()->hasTable($tableName)) {
+            $this->dbSchema()->create($tableName, function (Blueprint $table) {
+                if ($this->idType == 'auto_increment') {
+                    $table->increments($this->primaryKey);
+                } elseif ($this->idType == 'uuid') {
+                    $table->string($this->primaryKey, 36);
+                    $table->primary($this->primaryKey);
+                }
+            });
+        }
+        $this->tableSchema(function (Blueprint $table) {
+            if ($this->idType == 'auto_increment' && $this->getColumnType($this->primaryKey) == 'string') {
+                $table->increments($this->primaryKey)->change();
+            } elseif ($this->idType == 'uuid' && $this->getColumnType($this->primaryKey) == 'integer') {
+                $table->string($this->primaryKey, 36)->change();
+            }
+            if ($this->timestamps && !$this->hasColumns(['created_at', 'updated_at'])) {
+                $table->timestamps();
+            }
+            $this->checkFieldsSchema($table);
+        });
+    }
+
+    /**
+     * @param Blueprint $table
+     * @return $this
+     */
+    public function checkFieldsSchema(Blueprint $table)
+    {
+        foreach ($this->calculatedFields() as $name => $data) {
+            $field = $this->field($name);
+            $field->checkSchema($table);
+            $field->checkIndexes($table);
+        }
+        return $this;
+    }
+
+}
