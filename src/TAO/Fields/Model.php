@@ -17,7 +17,9 @@ abstract class Model extends \Illuminate\Database\Eloquent\Model
     use Fields\Utils\Model\Schema,
         Fields\Utils\Model\Events,
         Fields\Utils\Model\Access,
-        Fields\Utils\Model\Admin;
+        Fields\Utils\Model\Admin,
+        Fields\Utils\Model\Urls,
+        Fields\Utils\Model\View;
 
     /**
      * @var bool
@@ -26,7 +28,7 @@ abstract class Model extends \Illuminate\Database\Eloquent\Model
     /**
      * @var string
      */
-    protected $idType = 'uuid';
+    protected $idType = 'auto_increment';
 
     /**
      * @var string
@@ -69,6 +71,11 @@ abstract class Model extends \Illuminate\Database\Eloquent\Model
     public function getDatatype()
     {
         return \TAO::datatypeCodeByClass(get_class($this));
+    }
+
+    public function getDatatypeObject()
+    {
+        return \TAO::datatype($this->getDatatype());
     }
 
     /**
@@ -182,12 +189,24 @@ abstract class Model extends \Illuminate\Database\Eloquent\Model
         return $this;
     }
 
-    /**
-     * @param $request
-     * @return bool
-     */
-    public function route($request)
+    public function automaticRoutes()
     {
         return false;
+    }
+
+    public function listRoutes()
+    {
+        $baseUrl = $this->getBaseListUrl();
+        $pageUrl = $this->listUrl('{page}');
+
+        \Route::any($baseUrl, function() {
+            return $this->renderListPage(1);
+        });
+
+        if ($pageUrl) {
+            \Route::any($pageUrl, function($page) {
+                return $this->renderListPage($page);
+            })->where('page','^\d+$');
+        }
     }
 }

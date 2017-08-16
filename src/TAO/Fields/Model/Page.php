@@ -6,6 +6,7 @@ use TAO\Fields\PageModel;
 class Page extends PageModel
 {
     protected $table = 'pages';
+    protected $idType = 'uuid';
 
     public function fields()
     {

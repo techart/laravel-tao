@@ -5,6 +5,8 @@ namespace TAO\App\Exceptions;
 use Exception;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Contracts\View\Factory as ViewFactory;
+
 
 class Handler extends ExceptionHandler
 {
@@ -44,6 +46,14 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
+        if ($this->isHttpException($exception)) {
+            $status = $exception->getStatusCode();
+            $view = "{$status}";
+            $factory = app(ViewFactory::class);
+            if ($factory->exists($view)) {
+                return response(view($view), $status);
+            }
+        }
         return parent::render($request, $exception);
     }
 

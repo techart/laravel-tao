@@ -6,7 +6,6 @@ use TAO\Fields\Model as AbstractModel;
 class Role extends AbstractModel
 {
     protected $table = 'roles';
-    protected $idType = 'auto_increment';
 
     public function fields()
     {

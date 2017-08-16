@@ -66,6 +66,11 @@ class TableController extends AdminController
         return $this->filteredDatatype()->count();
     }
 
+    protected function canAdd()
+    {
+        return $this->datatype()->accessAdd();
+    }
+
     protected function selectRows()
     {
         return $this->filteredDatatype()

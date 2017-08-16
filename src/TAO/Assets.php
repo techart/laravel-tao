@@ -21,6 +21,11 @@ class Assets
     {
         return view('tao::meta', array('meta' => $this->meta));
     }
+    
+    public function meta()
+    {
+        return $this->renderMeta();
+    }
 
     public function useFile($file, $scope = false)
     {
@@ -112,8 +117,18 @@ class Assets
         return $html;
     }
 
-    public function blockBottomScripts()
+    public function bottomScripts()
     {
         return $this->block('bottom_scripts');
+    }
+
+    public function scripts()
+    {
+        return $this->block('scripts');
+    }
+
+    public function styles()
+    {
+        return $this->block('styles');
     }
 }

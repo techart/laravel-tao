@@ -4,6 +4,7 @@ namespace TAO\Fields\Controllers;
 
 trait Table
 {
+    protected $canAdd = false;
     protected $canEdit = false;
     protected $canDelete = false;
     protected $canCopy = false;
@@ -12,21 +13,31 @@ trait Table
     {
         $this->initViews();
         $count = $this->countRows();
+        $numPages = ceil($count/$this->perPage());
         $rows = $this->prepareRows();
         return $this->render('table ~ list.table', [
             'title' => $this->titleList(),
             'datatype' => $this->datatype(),
             'fields' => $this->listFields(),
             'count' => $count,
+            'per_page' => $this->perPage(),
+            'numpages' => $numPages,
             'rows' => $rows,
+            'can_add' => $this->canAdd(),
             'can_edit' => $this->canEdit,
             'can_delete' => $this->canDelete,
             'can_copy' => $this->canCopy,
-            'can_add' => $this->datatype()->accessAdd(\Auth::user()),
             'add_text' => $this->datatype()->adminAddButtonText(),
             'with_filter' => true,
             'with_row_actions' => ($this->canEdit || $this->canDelete || $this->canCopy),
+            'pager_callback' => array($this, 'pageUrl'),
+            'page' => $this->page,
         ]);
+    }
+
+    public function pageUrl($page)
+    {
+        return $this->actionUrl('list', array('page' => $page));
     }
 
     protected function prepareRows()

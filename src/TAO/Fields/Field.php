@@ -204,12 +204,17 @@ abstract class Field
         return $this->item->accessEdit($user);
     }
 
+    public function value()
+    {
+        return $this->item[$this->name];
+    }
+
     /**
      * @return mixed
      */
     public function render()
     {
-        return $this->item[$this->name];
+        return $this->value();
     }
 
 
@@ -336,6 +341,9 @@ abstract class Field
      */
     public function styleForInput()
     {
+        if (\TAO::inAdmin()) {
+            return $this->styleForAdminInput();
+        }
         return $this->param(['form_style', 'style'], '');
     }
 
@@ -352,6 +360,9 @@ abstract class Field
      */
     public function classForInput()
     {
+        if (\TAO::inAdmin()) {
+            return $this->classForAdminInput();
+        }
         $classes = $this->param(['form_class', 'class'], '');
         if (is_array($classes)) {
             $classes = implode(' ', $classes);

@@ -25,6 +25,12 @@ class Controller extends BaseController
     protected function render($template, $context = array())
     {
         $context['controller'] = $this;
+        return view($template, $context);
+    }
+
+    protected function renderWithinLayout($template, $context = array())
+    {
+        $context['controller'] = $this;
         return \TAO::renderWithinLayout($template, $context);
     }
 

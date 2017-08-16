@@ -1,8 +1,8 @@
 /** Home Page **/
 body {
-	padding-top: 0;
-	padding-bottom: 40px;
-	background-color: #f5f5f5;
+    padding-top: 0;
+    padding-bottom: 40px;
+    background-color: #f5f5f5;
 }
 
 
@@ -246,4 +246,9 @@ fieldset.admin {
 
 .form-tabs-navbar {
   margin: 0;
+}
+
+.page-navigator {
+  text-align: right;
+  margin: 20px 0;
 }

@@ -6,6 +6,6 @@ class DashboardController extends AdminController
 {
     public function index()
     {
-        return $this->render('tao::admin.dashboard');
+        return $this->render('admin ~ dashboard');
     }
 }

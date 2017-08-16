@@ -1,8 +1,0 @@
-<ul {{ args|raw }}>
-{% for link in links %}
-    {% if link.withDivider() %}
-        <li class="divider"></li>
-    {% endif %}
-    <li>{{ view('navigation ~ link', { link: link }) }}</li>
-{% endfor %}
-</ul>

@@ -1,27 +1,17 @@
 <?php
 
 namespace TAO\Fields;
+use Illuminate\View\View;
 
 class Router extends \TAO\Router
 {
     public $item;
 
-    public function route($request)
+    public function routes()
     {
         foreach(\TAO::datatypeCodes() as $code) {
             $datatype = \TAO::datatype($code);
-            $r = $datatype->route($request);
-            if ($r) {
-                if (is_array($r)) {
-                    if (isset($r['item'])) {
-                        $this->item = $r['item'];
-                    }
-                    return $r;
-                }
-                break;
-            }
+            $datatype->automaticRoutes();
         }
-
-        return false;
     }
 }

@@ -11,7 +11,7 @@ abstract class PageModel extends Model
             'isactive' => array(
                 'type' => 'checkbox index',
                 'label' => 'Включено к показу',
-                'label_int_list' => 'Вкл',
+                'label_in_admin_list' => 'Вкл',
                 'default' => 1,
                 'weight' => -900,
                 'in_list' => true,
@@ -102,16 +102,49 @@ abstract class PageModel extends Model
         return $this->templateFor('full');
     }
 
-    public function route($request)
+    public function automaticRoutes()
     {
+        $request = app()->request();
         $url = $request->getPathInfo();
         $item = $this->where('url', $url)->where('isactive', 1)->first();
         if ($item) {
-            return array(
-                'controller' => $this->viewController(),
-                'item' => $item,
-            );
+            \Route::any($url, function() use($item) {
+                return $this->renderItemPage($item);
+            });
         }
+    }
+
+    public function url()
+    {
+        $url = trim($this->field('url')->value());
+        if ($url=='') {
+            return $this->itemUrl($this);
+        }
+        return $url;
+    }
+
+    public function itemUrl($item)
+    {
+        $id = is_object($item)? $item->getKey() : $item;
+        $url =  '/'.$this->getUrlCode()."/{$id}/";
+        return $url;
+    }
+
+    public function itemRoutes()
+    {
+        $url = $this->itemUrl('{id}');
+        \Route::any($url, function($id) {
+            $item = $this->find($id);
+            if ($item->isactive) {
+                $itemUrl = $item->url();
+                $request = app()->request();
+                $url = $request->getPathInfo();
+                if ($url != $itemUrl) {
+                    return \Redirect::away($itemUrl, 301);
+                }
+                return $this->renderItemPage($item);
+            }
+        })->where('id', '^\d+$');
     }
 
 }

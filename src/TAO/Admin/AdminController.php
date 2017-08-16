@@ -19,6 +19,13 @@ class AdminController extends \TAO\Controller
         return '/admin/login';
     }
 
+    public function setup()
+    {
+        parent::setup();
+        \TAO::setInAdmin(true);
+        return $this;
+    }
+
     protected function accessAction($method, $parameters)
     {
         if (! \Auth::check()) {

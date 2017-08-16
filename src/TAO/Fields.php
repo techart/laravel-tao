@@ -13,6 +13,7 @@ class Fields
     protected $classes = array(
         'string' => 'StringField',
         'remember_token' => 'RememberToken',
+        'date_integer' => 'DateInteger',
         'Integer', 'Text', 'Checkbox', 'Password', 'Multilink');
 
     public function init()
@@ -128,16 +129,5 @@ class Fields
             'extra' => $extra,
             'args' => $args,
         );
-    }
-
-    public function template($name)
-    {
-        $factory = app(ViewFactory::class);
-        $view = "fields.{$name}";
-        if ($factory->exists($view)) {
-            return $view;
-        }
-        return "tao::fields.{$name}";
-
     }
 }

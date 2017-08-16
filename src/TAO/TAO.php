@@ -26,7 +26,11 @@ class TAO
 
     public $layout = 'layouts.app';
 
-    public $controller;
+    protected $datatypes = null;
+    protected $controller;
+    protected $inAdmin = false;
+
+
 
     public function useLayout($name)
     {
@@ -46,6 +50,17 @@ class TAO
     public function controller()
     {
         return $this->controller;
+    }
+
+    public function setInAdmin($value)
+    {
+        $this->inAdmin = $value;
+        return $this;
+    }
+
+    public function inAdmin()
+    {
+        return $this->inAdmin;
     }
 
     public function pageNotFound()
@@ -168,18 +183,45 @@ class TAO
         }
     }
 
-    public function datatype($name, $default = null)
+    public function datatypeClasses()
     {
-        $datatypes = config('tao.datatypes', array());
+        if (!$this->datatypes) {
+            $this->datatypes = config('tao.datatypes', array());
+        }
+        return $this->datatypes;
+    }
+
+
+    public function datatypeClass($name, $default = null)
+    {
+        $datatypes = $this->datatypeClasses();
         if (!isset($datatypes[$name]) && !is_null($default)) {
             return $default;
         }
-        return app()->make($datatypes[$name]);
+        return $datatypes[$name];
+    }
+
+    public function datatype($name, $default = null)
+    {
+        $class = $this->datatypeClass($name);
+        if (empty($class)) {
+            return $default;
+        }
+        return app()->make($class);
+    }
+
+    public function addDatatype($name, $class)
+    {
+        $c = $this->datatypeClass($name);
+        if (empty($c)) {
+            $this->datatypes[$name] = $class;
+        }
+        return $this;
     }
 
     public function datatypeCodes()
     {
-        return array_keys(config('tao.datatypes', array()));
+        return array_keys($this->datatypeClasses());
     }
 
     public function datatypes()
@@ -194,7 +236,7 @@ class TAO
     public function datatypeCodeByClass($class)
     {
         $class = ltrim($class, '/');
-        $datatypes = config('tao.datatypes', array());
+        $datatypes = $this->datatypeClasses();
         foreach ($datatypes as $code => $dclass) {
             $dclass = ltrim($dclass, '/');
             if ($class == $dclass) {
@@ -258,7 +300,7 @@ class TAO
 
     public function meta()
     {
-        return app()->taoAssets->renderMeta();
+        return app()->taoAssets->meta();
     }
 
     public function render($template, $context = array())

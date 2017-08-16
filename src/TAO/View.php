@@ -47,8 +47,6 @@ class View
 
     public function renderSections($template, $context)
     {
-        //$factory = app(ViewFactory::class);
-        //$r = $factory->make($template, $context);
         $r = view($template, $context);
         $sections = array();
         foreach($r->renderSections() as $section => $content) {
@@ -80,8 +78,6 @@ class View
                 $factory->startSection($section);
                 print $sectionContent;
                 $factory->stopSection();
-                //$factory->inject($section, $sectionContent);
-                //\Section::inject($section, $sectionContent);
             }
             $r = $factory->make($layout, $context);
             $content = $r->render();

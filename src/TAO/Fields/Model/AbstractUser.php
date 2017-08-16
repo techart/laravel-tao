@@ -18,7 +18,6 @@ abstract class AbstractUser extends AbstractModel implements
     use Authenticatable, Authorizable, CanResetPassword;
 
     public $isBlocked = false;
-    protected $idType = 'auto_increment';
 
     public function fields()
     {
