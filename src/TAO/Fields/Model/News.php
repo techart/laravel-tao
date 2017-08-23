@@ -17,6 +17,14 @@ class News extends PageModel
                 'in_form' => true,
                 'group' => 'common',
             ),
+            'category_id' => array(
+                'type' => 'select(integer) index',
+                'items' => 'datatype:categories/0=Корень',
+                'label' => 'Категория',
+                'in_list' => false,
+                'in_form' => true,
+                'group' => 'common',
+            ),
             'announce' => array(
                 'type' => 'text',
                 'label' => 'Анонс',

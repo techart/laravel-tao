@@ -21,7 +21,7 @@
         <input id="email" type="email" name="email" class="input-block-level" placeholder="E-Mail">
         <input id="password" name="password" type="password" class="input-block-level" placeholder="Пароль">
         <label class="checkbox">
-          <input type="checkbox" value="remember-me"> Запомнить меня
+          <input type="checkbox" value="1" name="remember"> Запомнить меня
         </label>
         <button class="btn btn-large btn-primary" type="submit">Вход</button>
       </form>

@@ -26,14 +26,32 @@ abstract class Model extends \Illuminate\Database\Eloquent\Model
      */
     public $incrementing = false;
     /**
-     * @var string
+     * @var array
      */
-    protected $idType = 'auto_increment';
+    public $childs = [];
+
+    /**
+     * @var bool
+     */
+    public $isTree = false;
+
+    public $isFirstBranch = false;
+
+    public $isLastBranch = false;
+
+    public $prevBranch = false;
+
+    public $nextBranch = false;
 
     /**
      * @var string
      */
-    protected $adminType = 'table';
+    protected $parentKeyField = 'parent_id';
+
+    /**
+     * @var string
+     */
+    protected $idType = 'auto_increment';
 
     /**
      * @var array
@@ -180,6 +198,11 @@ abstract class Model extends \Illuminate\Database\Eloquent\Model
         return Uuid::uuid4();
     }
 
+    public function title()
+    {
+        return isset($this->attributes['title']) ? $this->attributes['title'] : $this->getKey();
+    }
+
     /**
      * @param $filter
      * @return $this
@@ -189,24 +212,109 @@ abstract class Model extends \Illuminate\Database\Eloquent\Model
         return $this;
     }
 
-    public function automaticRoutes()
+    public function ordered()
     {
-        return false;
+        return $this->orderBy($this->getKeyName());
     }
 
-    public function listRoutes()
+    /**
+     * @return array
+     */
+    public function allRows()
     {
-        $baseUrl = $this->getBaseListUrl();
-        $pageUrl = $this->listUrl('{page}');
-
-        \Route::any($baseUrl, function() {
-            return $this->renderListPage(1);
-        });
-
-        if ($pageUrl) {
-            \Route::any($pageUrl, function($page) {
-                return $this->renderListPage($page);
-            })->where('page','^\d+$');
+        $out = [];
+        foreach ($this->ordered()->get() as $row) {
+            $out[$row->getKey()] = $row;
         }
+        return $out;
+    }
+
+    /**
+     * @param bool $args
+     * @return array
+     */
+    public function itemsForSelect($args = false)
+    {
+        if ($this->isTree) {
+            return $this->treeForSelect($args);
+        }
+        $out = [];
+        if (is_string($args) && $m = \TAO::regexp('{(.+)=(.+)}', $args)) {
+            $out[$m[1]] = $m[2];
+        }
+        foreach ($this->allRows() as $row) {
+            $out[$row->getKey()] = $row->title();
+        }
+        return $out;
+    }
+
+    /**
+     * @param bool $args
+     * @return array
+     */
+    public function treeForSelect($args = false)
+    {
+
+        $tree = $this->buildTree();
+
+        if (is_string($args) && $m = \TAO::regexp('{(.+)=(.+)}', $args)) {
+            $out = [$m[1] => $m[2]];
+        }
+        $this->buildTreeForSelect($tree, '-&nbsp;&nbsp;&nbsp;', $out);
+        return $out;
+    }
+
+    /**
+     * @param $tree
+     * @param $prefix
+     * @param $out
+     */
+    protected function buildTreeForSelect(&$tree, $prefix, &$out)
+    {
+        foreach ($tree as $key => $row) {
+            $out[$key] = $prefix . $row->title();
+            $this->buildTreeForSelect($row->childs, $prefix . '-&nbsp;&nbsp;&nbsp;', $out);
+        }
+    }
+
+    /**
+     * @return array
+     */
+    public function buildTree()
+    {
+        $rows = $this->allRows();
+        return $this->buildTreeBranch(0, $rows);
+    }
+
+    /**
+     * @param $root
+     * @param $src
+     * @return array
+     */
+    public function buildTreeBranch($root, &$src)
+    {
+        $out = [];
+        $first = true;
+        $prev = false;
+        foreach ($src as $key => $row) {
+            $pid = $row[$this->parentKeyField];
+            if ($row[$this->parentKeyField] == $root) {
+                if ($first) {
+                    $row->isFirstBranch = true;
+                    $first = false;
+                }
+                if ($prev) {
+                    $row->prevBranch = $prev;
+                    $prev->nextBranch = $row;
+                    $prev->isLastBranch = false;
+                }
+
+                $row->childs = $this->buildTreeBranch($key, $src);
+                $out[$key] = $row;
+                $prev = $row;
+                $row->isLastBranch = true;
+            }
+        }
+        return $out;
     }
 }

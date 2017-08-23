@@ -312,4 +312,22 @@ class TAO
     {
         return app()->taoView->renderWithinLayout($template, $context);
     }
+
+    public function itemsForSelect($src)
+    {
+        if (is_array($src)) {
+            return $src;
+        }
+        if (is_string($src)) {
+            $args = '';
+            if ($m = \TAO::regexp('{^(.+?)/(.+)$}', $src)) {
+                $src = trim($m[1]);
+                $args = trim($m[2]);
+            }
+            if ($m = \TAO::regexp('{^datatype:(.+)$}', $src)) {
+                return \TAO::datatype(trim($m[1]))->itemsForSelect($args);
+            }
+        }
+        return array();
+    }
 }

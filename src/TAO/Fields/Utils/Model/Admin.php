@@ -13,7 +13,7 @@ trait Admin
      */
     public function adminController()
     {
-        return $this->adminType == 'tree' ? '\\TAO\\Admin\\TreeController' : '\\TAO\\Admin\\TableController';
+        return '\\TAO\\Admin\\TableController@entryPointAction';
     }
 
     public function adminMenuSection()

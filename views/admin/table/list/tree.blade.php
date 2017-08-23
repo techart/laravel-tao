@@ -4,8 +4,6 @@
 @include('table ~ list.right-buttons')
 
 @section('content')
-    
-    @include('table ~ list.navigator-top')
 
     <div class="block-simple">
         <div class="block-content">
@@ -13,12 +11,10 @@
                 @include('table ~ list.empty')
             @else
                 @include('table ~ list.before-data')
-                @include('table ~ list.data-table')
+                @include('table ~ list.data-tree')
                 @include('table ~ list.after-data')
            @endif
        </div>
     </div>
-
-    @include ('table ~ list.navigator-bottom')
 
 @endsection

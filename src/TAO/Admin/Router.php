@@ -27,7 +27,7 @@ class Router extends \TAO\Router
                     $this->datatype = $datatype;
                     $this->datatypeCode = $code;
                     $controller = $datatype->adminController();
-                    app()->router->any("/admin/datatype/{$code}", "{$controller}@entryPointAction");
+                    app()->router->any("/admin/datatype/{$code}", $controller);
                 }
             }
         }

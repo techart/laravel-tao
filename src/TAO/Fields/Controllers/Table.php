@@ -12,6 +12,11 @@ trait Table
     public function listAction()
     {
         $this->initViews();
+
+        if ($this->datatype()->isTree) {
+            return $this->treeAction();
+        }
+
         $count = $this->countRows();
         $numPages = ceil($count/$this->perPage());
         $rows = $this->prepareRows();
@@ -35,6 +40,47 @@ trait Table
         ]);
     }
 
+    public function treeAction()
+    {
+        $tree = $this->datatype()->buildTree();
+        $this->prepareTree($tree);
+
+        return $this->render('table ~ list.tree', [
+            'title' => $this->titleList(),
+            'count' => count($tree),
+            'datatype' => $this->datatype(),
+            'fields' => $this->listFields(),
+            'tree' => $tree,
+            'can_add' => $this->canAdd(),
+            'can_edit' => $this->canEdit,
+            'can_delete' => $this->canDelete,
+            'can_copy' => $this->canCopy,
+            'add_text' => $this->datatype()->adminAddButtonText(),
+            'with_filter' => false,
+            'with_row_actions' => ($this->canEdit || $this->canDelete || $this->canCopy),
+        ]);
+    }
+
+    public function weightAction()
+    {
+        $with = app()->request()->get('with');
+        if (is_null($this->id) || is_null($with)) {
+            return \TAO::pageNotFound();
+        }
+
+        $item1 = $this->datatype()->find($this->id);
+        $item2 = $this->datatype()->find($with);
+        if (!$item1 || !$item1->accessEdit(\Auth::user()) || !$item2 || !$item2->accessEdit(\Auth::user())) {
+            return \TAO::pageNotFound();
+        }
+        $v = $item1['weight'];
+        $item1['weight'] = $item2['weight'];
+        $item2['weight'] = $v;
+        $item1->save();
+        $item2->save();
+        return redirect($this->actionUrl('list'));
+    }
+
     public function pageUrl($page)
     {
         return $this->actionUrl('list', array('page' => $page));
@@ -44,16 +90,31 @@ trait Table
     {
         $rows = array();
         foreach($this->selectRows() as $row) {
-            $row->prepareForAdminList();
-            if($row->accessEdit(\Auth::user())) {
-                $this->canEdit = true;
-            }
-            if($row->accessDelete(\Auth::user())) {
-                $this->canDelete = true;
-            }
+            $this->prepareRow($row);
             $rows[] = $row;
         }
         return $rows;
+    }
+
+    protected function prepareTree($tree)
+    {
+        foreach($tree as $row) {
+            $this->prepareRow($row);
+            if (isset($row->childs) && is_array($row->childs)) {
+                $this->prepareTree($row->childs);
+            }
+        }
+    }
+
+    protected function prepareRow($row)
+    {
+        $row->prepareForAdminList();
+        if($row->accessEdit(\Auth::user())) {
+            $this->canEdit = true;
+        }
+        if($row->accessDelete(\Auth::user())) {
+            $this->canDelete = true;
+        }
     }
 
     protected function listFields()

@@ -54,4 +54,25 @@ trait Urls
         return false;
     }
 
+    public function automaticRoutes()
+    {
+        return false;
+    }
+
+    public function listRoutes()
+    {
+        $baseUrl = $this->getBaseListUrl();
+        $pageUrl = $this->listUrl('{page}');
+
+        \Route::any($baseUrl, function() {
+            return $this->renderListPage(1);
+        });
+
+        if ($pageUrl) {
+            \Route::any($pageUrl, function($page) {
+                return $this->renderListPage($page);
+            })->where('page','^\d+$');
+        }
+    }
+
 }
