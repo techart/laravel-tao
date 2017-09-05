@@ -318,3 +318,25 @@ td.admin-tree-title {}
       .controls a.control i.down {
         background-position: -312px -96px;
       }
+
+.tao-fields-upload {
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+  .tao-fields-upload .upload-progress {
+    display: inline-block;
+    width: 20px;
+    height: 10px;
+    background-image: url(/tao/images/loader1.gif);
+    background-repeat: no-repeat;
+  }
+
+  .tao-fields-upload .preview {
+    display: block;
+  }
+  
+  .tao-fields-upload .upload-error {
+    color: red;
+  }

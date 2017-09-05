@@ -1,4 +1,5 @@
 <?php
+
 namespace TAO\View;
 
 use Illuminate\View\FileViewFinder;
@@ -6,6 +7,10 @@ use Illuminate\Contracts\View\Factory as ViewFactory;
 
 class Finder extends FileViewFinder
 {
+    /**
+     * @param string $name
+     * @return string
+     */
     public function find($name)
     {
         if ($m = \TAO::regexp('{^table\s*~(.+)$}', $name)) {
@@ -18,16 +23,21 @@ class Finder extends FileViewFinder
         return parent::find($name);
     }
 
+    /**
+     * @param $view
+     * @return bool
+     */
+
     public function exists($view)
     {
         $factory = app(ViewFactory::class);
-        return $factory->exists($view)? $view : false;
+        return $factory->exists($view) ? $view : false;
     }
 
     public function findInTAO($dir, $name)
     {
         $names = explode('|', $name);
-        foreach($names as $name) {
+        foreach ($names as $name) {
             if ($name = trim($name)) {
                 if ($view = $this->exists("{$dir}.{$name}")) {
                     return $view;

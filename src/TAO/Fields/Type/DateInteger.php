@@ -11,7 +11,7 @@ class DateInteger extends Field
     {
         return $table->integer($this->name, false, true);
     }
-    
+
     public function defaultValue()
     {
         return 0;
@@ -60,13 +60,11 @@ class DateInteger extends Field
     public function set($value)
     {
         if ($m = \TAO::regexp('{^(\d+)\.(\d+)\.(\d+)$}', $value)) {
-            $value = mktime(0,0,0,$m[2], $m[1], $m[3]);
-        }
-        elseif ($m = \TAO::regexp('{^(\d+)\.(\d+)\.(\d+)\s*-\s*(\d+):(\d+)$}', $value)) {
-            $value = mktime($m[4],$m[5],0,$m[2], $m[1], $m[3]);
-        }
-        elseif ($m = \TAO::regexp('{^(\d+)\.(\d+)\.(\d+)\s*-\s*(\d+):(\d+):(\d+)$}', $value)) {
-            $value = mktime($m[4],$m[5],$m[6],$m[2], $m[1], $m[3]);
+            $value = mktime(0, 0, 0, $m[2], $m[1], $m[3]);
+        } elseif ($m = \TAO::regexp('{^(\d+)\.(\d+)\.(\d+)\s*-\s*(\d+):(\d+)$}', $value)) {
+            $value = mktime($m[4], $m[5], 0, $m[2], $m[1], $m[3]);
+        } elseif ($m = \TAO::regexp('{^(\d+)\.(\d+)\.(\d+)\s*-\s*(\d+):(\d+):(\d+)$}', $value)) {
+            $value = mktime($m[4], $m[5], $m[6], $m[2], $m[1], $m[3]);
         }
         $this->item[$this->name] = $value;
     }

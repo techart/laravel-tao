@@ -2,11 +2,21 @@
 
 namespace TAO\Fields\Controllers;
 
+/**
+ * Trait Forms
+ * @package TAO\Fields\Controllers
+ */
 trait Forms
 {
 
+    /**
+     * @var
+     */
     protected $editItem;
 
+    /**
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     */
     public function editAction()
     {
         if (is_null($this->id)) {
@@ -25,16 +35,16 @@ trait Forms
 
         $request = \Request::getFacadeRoot();
         if ($request->method() == 'POST') {
-            foreach($fields as $field) {
+            foreach ($fields as $field) {
                 $field->setFromRequest($request);
             }
             $errors = $item->errors();
             if (!is_array($errors)) {
                 $errors = array();
             }
-            if (count($errors)==0) {
+            if (count($errors) == 0) {
                 $item->save();
-                foreach($fields as $field) {
+                foreach ($fields as $field) {
                     $field->setFromRequestAfterSave($request);
                 }
                 return redirect($this->actionUrl('list'));
@@ -52,6 +62,9 @@ trait Forms
         )));
     }
 
+    /**
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     */
     public function addAction()
     {
         $item = $this->datatype()->newInstance();
@@ -65,16 +78,16 @@ trait Forms
 
         $request = \Request::getFacadeRoot();
         if ($request->method() == 'POST') {
-            foreach($fields as $field) {
+            foreach ($fields as $field) {
                 $field->setFromRequest($request);
             }
             $errors = $item->errors();
             if (!is_array($errors)) {
                 $errors = array();
             }
-            if (count($errors)==0) {
+            if (count($errors) == 0) {
                 $item->save();
-                foreach($fields as $field) {
+                foreach ($fields as $field) {
                     $field->setFromRequestAfterSave($request);
                 }
                 return redirect($this->actionUrl('list', array('page' => 1)));
@@ -91,6 +104,9 @@ trait Forms
         )));
     }
 
+    /**
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     */
     public function deleteAction()
     {
         if (is_null($this->id)) {
@@ -105,22 +121,26 @@ trait Forms
         return redirect($this->actionUrl('list'));
     }
 
+    /**
+     * @param $params
+     * @return array
+     */
     protected function formViewParams($params)
     {
         $firstTab = false;
         $tabs = $this->datatype()->adminFormTabs();
         $etabs = $tabs;
-        foreach($params['fields'] as $field) {
+        foreach ($params['fields'] as $field) {
             $etabs[$field->adminTab()] = true;
         }
-        foreach($etabs as $tab => $v) {
-            if ($v!==true && isset($tabs[$tab])) {
+        foreach ($etabs as $tab => $v) {
+            if ($v !== true && isset($tabs[$tab])) {
                 unset($tabs[$tab]);
             }
         }
 
         if (is_array($tabs)) {
-            foreach(array_keys($tabs) as $tab) {
+            foreach (array_keys($tabs) as $tab) {
                 $firstTab = $tab;
                 break;
             }

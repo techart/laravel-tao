@@ -8,6 +8,12 @@ namespace TAO\Fields\Utils\Model;
  */
 trait Admin
 {
+    public $adminMenuSection = 'Материалы';
+    public $adminPerPage = 20;
+    public $adminTitle = false;
+
+
+
     /**
      * @return string
      */
@@ -18,7 +24,23 @@ trait Admin
 
     public function adminMenuSection()
     {
-        return false;
+        return $this->adminMenuSection;
+    }
+
+    /**
+     * @return string
+     */
+    public function adminTitle()
+    {
+        return $this->adminTitle? $this->adminTitle: get_class($this);
+    }
+
+    /**
+     * @return int
+     */
+    public function adminPerPage()
+    {
+        return $this->adminPerPage;
     }
 
     /**
@@ -80,22 +102,6 @@ trait Admin
     public function adminViewsPath()
     {
         return false;
-    }
-
-    /**
-     * @return int
-     */
-    public function adminPerPage()
-    {
-        return 20;
-    }
-
-    /**
-     * @return string
-     */
-    public function adminTitle()
-    {
-        return get_class($this);
     }
 
     /**

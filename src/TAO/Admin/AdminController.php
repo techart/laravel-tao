@@ -2,23 +2,39 @@
 
 namespace TAO\Admin;
 
+/**
+ * Class AdminController
+ * @package TAO\Admin
+ */
 class AdminController extends \TAO\Controller
 {
+    /**
+     * @return string
+     */
     protected function realm()
     {
         return 'admin';
     }
 
+    /**
+     * @return mixed
+     */
     public function layout()
     {
         return app()->taoAdmin->layout();
     }
 
+    /**
+     * @return string
+     */
     protected function urlLogin()
     {
         return '/admin/login';
     }
 
+    /**
+     * @return $this
+     */
     public function setup()
     {
         parent::setup();
@@ -26,9 +42,14 @@ class AdminController extends \TAO\Controller
         return $this;
     }
 
+    /**
+     * @param $method
+     * @param $parameters
+     * @return bool|\Illuminate\Contracts\Routing\ResponseFactory|\Symfony\Component\HttpFoundation\Response
+     */
     protected function accessAction($method, $parameters)
     {
-        if (! \Auth::check()) {
+        if (!\Auth::check()) {
             return false;
         }
         $rc = \Auth::user()->accessToRealm($this->realm());

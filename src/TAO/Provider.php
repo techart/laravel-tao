@@ -38,6 +38,10 @@ class Provider extends ServiceProvider
             return new \TAO\View\Finder($app['files'], $app['config']['view.paths']);
         });
 
+        $this->app->singleton('session', function ($app) {
+            return new \TAO\Session\Manager($app);
+        });
+        
         $this->app->singleton('tao', function() {
             $tao = app()->make('\\TAO\\TAO');
             $tao->app = $this->app;
@@ -80,6 +84,10 @@ class Provider extends ServiceProvider
         if (!is_link($link)) {
             $assets = str_replace('/src/TAO', '', __DIR__).'/public';
             symlink($assets, $link);
+        }
+        $link = "{$www}/storage";
+        if (!is_link($link)) {
+            symlink(storage_path('app/public'), $link);
         }
     }
 

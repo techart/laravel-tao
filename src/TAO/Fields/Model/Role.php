@@ -39,6 +39,11 @@ class Role extends AbstractModel
         return $this['title'];
     }
 
+    public function adminMenuSection()
+    {
+        return false;
+    }
+
     public function adminTitleList()
     {
         return 'Роли';

@@ -105,6 +105,11 @@ abstract class AbstractUser extends AbstractModel implements
         );
     }
 
+    public function adminMenuSection()
+    {
+        return false;
+    }
+
     public function adminTitleList()
     {
         return 'Зарегистрированные пользователи';

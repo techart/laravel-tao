@@ -11,14 +11,14 @@ class Multilink extends Field
 
     public function belongsToMany()
     {
-        return $this->item->belongsToMany($this->data['model'], $this->tableRelations(), $this->thisKey(), $this->relatedKey());
+        return $this->item->belongsToMany($this->relatedModelClass(), $this->tableRelations(), $this->thisKey(), $this->relatedKey());
     }
 
     public function attachedIds()
     {
         if (is_null($this->attachedIds)) {
             $this->attachedIds = array();
-            foreach($this->belongsToMany()->allRelatedIds() as $id) {
+            foreach ($this->belongsToMany()->allRelatedIds() as $id) {
                 $this->attachedIds[$id] = $id;
             }
         }
@@ -36,11 +36,7 @@ class Multilink extends Field
 
     public function items()
     {
-        $items = array();
-        foreach($this->relatedModel()->all() as $row) {
-            $items[$row->getKey()] = $row->title();
-        }
-        return $items;
+        return $this->relatedModel()->itemsForSelect();
     }
 
     public function checkSchema(Blueprint $table)
@@ -71,7 +67,7 @@ class Multilink extends Field
     {
         if ($request->has($this->name)) {
             $values = $request->get($this->name);
-            foreach($this->items() as $id => $title) {
+            foreach ($this->items() as $id => $title) {
                 if (isset($values[$id]) && $values[$id]) {
                     $this->belongsToMany()->attach($id);
                 } else {
@@ -86,7 +82,7 @@ class Multilink extends Field
         if (isset($this->data['table_relations'])) {
             return $this->data['table_relations'];
         }
-        return $this->item->getTable(). '_' . $this->relatedModel()->getTable() . '_relations';
+        return $this->item->getTable() . '_' . $this->relatedModel()->getTable() . '_relations';
     }
 
     public function thisKey()
@@ -105,9 +101,19 @@ class Multilink extends Field
         return $this->relatedModel()->getForeignKey();
     }
 
+    public function relatedModelClass()
+    {
+        $model = $this->param('model');
+        if (!$model) {
+            $datatype = $this->param('datatype');
+            $model = \TAO::datatypeClass($datatype);
+        }
+        return $model;
+    }
+
     public function relatedModel()
     {
-        return app()->make($this->data['model']);
+        return app()->make($this->relatedModelClass());
     }
 
     public function templateForInput()

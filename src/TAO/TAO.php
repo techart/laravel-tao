@@ -2,9 +2,6 @@
 
 namespace TAO;
 
-/**
- * Class TAO
- */
 class TAO
 {
     /**
@@ -29,7 +26,6 @@ class TAO
     protected $datatypes = null;
     protected $controller;
     protected $inAdmin = false;
-
 
 
     public function useLayout($name)
@@ -129,21 +125,21 @@ class TAO
 
     public function routes()
     {
-/*
-        $this->get('login', 'Auth\LoginController@showLoginForm')->name('login');
-        $this->post('login', 'Auth\LoginController@login');
-        $this->post('logout', 'Auth\LoginController@logout')->name('logout');
+        /*
+                $this->get('login', 'Auth\LoginController@showLoginForm')->name('login');
+                $this->post('login', 'Auth\LoginController@login');
+                $this->post('logout', 'Auth\LoginController@logout')->name('logout');
 
-        // Registration Routes...
-        $this->get('register', 'Auth\RegisterController@showRegistrationForm')->name('register');
-        $this->post('register', 'Auth\RegisterController@register');
+                // Registration Routes...
+                $this->get('register', 'Auth\RegisterController@showRegistrationForm')->name('register');
+                $this->post('register', 'Auth\RegisterController@register');
 
-        // Password Reset Routes...
-        $this->get('password/reset', 'Auth\ForgotPasswordController@showLinkRequestForm')->name('password.request');
-        $this->post('password/email', 'Auth\ForgotPasswordController@sendResetLinkEmail')->name('password.email');
-        $this->get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm')->name('password.reset');
-        $this->post('password/reset', 'Auth\ResetPasswordController@reset');
-*/
+                // Password Reset Routes...
+                $this->get('password/reset', 'Auth\ForgotPasswordController@showLinkRequestForm')->name('password.request');
+                $this->post('password/email', 'Auth\ForgotPasswordController@sendResetLinkEmail')->name('password.email');
+                $this->get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm')->name('password.reset');
+                $this->post('password/reset', 'Auth\ResetPasswordController@reset');
+        */
 
         foreach (array_keys($this->routers()) as $name) {
             $router = $this->router($name);
@@ -329,5 +325,17 @@ class TAO
             }
         }
         return array();
+    }
+
+    public function merge($a, $b)
+    {
+        foreach ($b as $k => $v) {
+            if (isset($a[$k]) && is_array($a[$k]) && is_array($v)) {
+                $a[$k] = $this->merge($a[$k], $v);
+            } else {
+                $a[$k] = $v;
+            }
+        }
+        return $a;
     }
 }

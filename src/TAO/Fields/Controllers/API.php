@@ -2,18 +2,47 @@
 
 namespace TAO\Fields\Controllers;
 
+use Illuminate\Http\Response;
 use TAO\Fields\Exception\UndefinedField;
 
+/**
+ * Class API
+ * @package TAO\Fields\Controllers
+ */
 class API extends \TAO\Controller
 {
+    /**
+     * @var
+     */
     public $datatypeCode;
+    /**
+     * @var
+     */
     public $fieldName;
+    /**
+     * @var
+     */
     public $datatype;
+    /**
+     * @var
+     */
     public $item;
+    /**
+     * @var
+     */
     public $id;
+    /**
+     * @var
+     */
     public $field;
+    /**
+     * @var
+     */
     public $action;
 
+    /**
+     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Symfony\Component\HttpFoundation\Response
+     */
     public function index()
     {
         $this->datatypeCode = \Request::get('datatype');
@@ -32,16 +61,19 @@ class API extends \TAO\Controller
                 }
                 try {
                     $this->field = $this->item->field($this->fieldName);
-                } catch(UndefinedField $e)  {
+                } catch (UndefinedField $e) {
                     return $this->error("Field {$this->field} not found");
                 }
 
                 if ($this->field->accessAPI()) {
-                    $method = 'apiAction'.ucfirst(camel_case($this->action));
+                    $method = 'apiAction' . ucfirst(camel_case($this->action));
                     if (!method_exists($this->field, $method)) {
                         return $this->error("API action '{$this->action}' not found");
                     }
                     $rc = $this->field->$method($this);
+                    if ($rc instanceof Response) {
+                        return $rc;
+                    }
                     if (is_string($rc)) {
                         return $this->error($rc);
                     }
@@ -52,11 +84,19 @@ class API extends \TAO\Controller
         return $this->pageNotFound();
     }
 
+    /**
+     * @param string $message
+     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Symfony\Component\HttpFoundation\Response
+     */
     protected function error($message = 'Error')
     {
         return $this->json(['error' => $message]);
     }
 
+    /**
+     * @param $m
+     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Symfony\Component\HttpFoundation\Response
+     */
     protected function response($m)
     {
         $m['error'] = false;

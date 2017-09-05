@@ -317,4 +317,42 @@ abstract class Model extends \Illuminate\Database\Eloquent\Model
         }
         return $out;
     }
+
+    protected function getHomeSubDir()
+    {
+        $id = $this->getKey();
+        if (empty($id)) {
+            return false;
+        }
+        if (is_int($id)) {
+            $p1 = str_pad(floor($id/1000), 4, '0', STR_PAD_LEFT);
+            $p2 = str_pad($id, 8, '0', STR_PAD_LEFT);
+        } else {
+            $p1 = substr($id, 0, 2);
+            $p2 = $id;
+        }
+        return 'datatypes/'.$this->getDatatype()."/{$p1}/{$p2}";
+    }
+
+    public function getHomeDir()
+    {
+        $sub = $this->getHomeSubDir();
+        if (!$sub) {
+            return false;
+        }
+        $dir = "public/{$sub}";
+        if (!\Storage::exists($dir)) {
+            \Storage::makeDirectory($dir);
+        }
+        return $dir;
+    }
+
+    public function getPrivateHomeDir()
+    {
+        $dir = $this->getHomeSubDir();
+        if (!\Storage::exists($dir)) {
+            \Storage::makeDirectory($dir);
+        }
+        return $dir;
+    }
 }

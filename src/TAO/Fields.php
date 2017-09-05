@@ -14,7 +14,7 @@ class Fields
         'string' => 'StringField',
         'remember_token' => 'RememberToken',
         'date_integer' => 'DateInteger',
-        'Integer', 'Text', 'Checkbox', 'Password', 'Multilink', 'Select');
+        'Integer', 'Text', 'Checkbox', 'Password', 'Multilink', 'Select', 'Upload', 'Image');
 
     public function init()
     {

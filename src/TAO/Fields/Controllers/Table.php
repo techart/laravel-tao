@@ -2,13 +2,32 @@
 
 namespace TAO\Fields\Controllers;
 
+/**
+ * Trait Table
+ * @package TAO\Fields\Controllers
+ */
 trait Table
 {
+    /**
+     * @var bool
+     */
     protected $canAdd = false;
+    /**
+     * @var bool
+     */
     protected $canEdit = false;
+    /**
+     * @var bool
+     */
     protected $canDelete = false;
+    /**
+     * @var bool
+     */
     protected $canCopy = false;
 
+    /**
+     * @return mixed
+     */
     public function listAction()
     {
         $this->initViews();
@@ -18,7 +37,7 @@ trait Table
         }
 
         $count = $this->countRows();
-        $numPages = ceil($count/$this->perPage());
+        $numPages = ceil($count / $this->perPage());
         $rows = $this->prepareRows();
         return $this->render('table ~ list.table', [
             'title' => $this->titleList(),
@@ -40,6 +59,9 @@ trait Table
         ]);
     }
 
+    /**
+     * @return mixed
+     */
     public function treeAction()
     {
         $tree = $this->datatype()->buildTree();
@@ -61,6 +83,9 @@ trait Table
         ]);
     }
 
+    /**
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     */
     public function weightAction()
     {
         $with = app()->request()->get('with');
@@ -81,24 +106,34 @@ trait Table
         return redirect($this->actionUrl('list'));
     }
 
+    /**
+     * @param $page
+     * @return mixed
+     */
     public function pageUrl($page)
     {
         return $this->actionUrl('list', array('page' => $page));
     }
 
+    /**
+     * @return array
+     */
     protected function prepareRows()
     {
         $rows = array();
-        foreach($this->selectRows() as $row) {
+        foreach ($this->selectRows() as $row) {
             $this->prepareRow($row);
             $rows[] = $row;
         }
         return $rows;
     }
 
+    /**
+     * @param $tree
+     */
     protected function prepareTree($tree)
     {
-        foreach($tree as $row) {
+        foreach ($tree as $row) {
             $this->prepareRow($row);
             if (isset($row->childs) && is_array($row->childs)) {
                 $this->prepareTree($row->childs);
@@ -106,32 +141,38 @@ trait Table
         }
     }
 
+    /**
+     * @param $row
+     */
     protected function prepareRow($row)
     {
         $row->prepareForAdminList();
-        if($row->accessEdit(\Auth::user())) {
+        if ($row->accessEdit(\Auth::user())) {
             $this->canEdit = true;
         }
-        if($row->accessDelete(\Auth::user())) {
+        if ($row->accessDelete(\Auth::user())) {
             $this->canDelete = true;
         }
     }
 
+    /**
+     * @return array
+     */
     protected function listFields()
     {
         $fields = array();
-        foreach($this->datatype()->fieldsObjects() as $name => $field) {
+        foreach ($this->datatype()->fieldsObjects() as $name => $field) {
             if ($field->inAdminList()) {
                 $fields[$name] = $field;
             }
         }
-        uasort($fields, function($f1, $f2) {
+        uasort($fields, function ($f1, $f2) {
             $w1 = $f1->weightInAdminList();
             $w2 = $f2->weightInAdminList();
-            if ($w1>$w2) {
+            if ($w1 > $w2) {
                 return 1;
             }
-            if ($w1<$w2) {
+            if ($w1 < $w2) {
                 return -1;
             }
             return 0;

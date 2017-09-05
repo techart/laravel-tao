@@ -21,7 +21,7 @@ class Assets
     {
         return view('tao::meta', array('meta' => $this->meta));
     }
-    
+
     public function meta()
     {
         return $this->renderMeta();
@@ -44,9 +44,9 @@ class Assets
         $file['path'] = $path;
 
         if (!$scope) {
-            if (preg_match('{\.css$}i',$path)) {
+            if (preg_match('{\.css$}i', $path)) {
                 $scope = 'styles';
-            } elseif (preg_match('{\.js$}i',$path)) {
+            } elseif (preg_match('{\.js$}i', $path)) {
                 $scope = 'scripts';
             }
         }
@@ -76,13 +76,13 @@ class Assets
         }
 
         $time = '';
-        $fpath = $path[0]=='/'? rtrim($_SERVER['DOCUMENT_ROOT'],'/') . $path: false;
+        $fpath = $path[0] == '/' ? rtrim($_SERVER['DOCUMENT_ROOT'], '/') . $path : false;
         if ($fpath && is_file($fpath)) {
             $time = filemtime($fpath);
         }
         $url = '';
         $tag = '';
-        if ($type == 'js' || $type=='css') {
+        if ($type == 'js' || $type == 'css') {
             $url = config("tao.{$type}url", '%path%?%time%');
             $url = str_replace('%path%', $path, $url);
             $url = str_replace('%time%', $time, $url);
@@ -90,11 +90,11 @@ class Assets
         }
 
         if (!empty($url)) {
-            if ($type=='js') {
-                $tag = config("tao.jstag", '<script src="%url%"></script>'."\n");
+            if ($type == 'js') {
+                $tag = config("tao.jstag", '<script src="%url%"></script>' . "\n");
             }
-            if ($type=='css') {
-                $tag = config("tao.csstag", '<link type="text/css" href="%url%">'."\n");
+            if ($type == 'css') {
+                $tag = config("tao.csstag", '<link type="text/css" href="%url%">' . "\n");
             }
             if (!empty($tag)) {
                 $tag = str_replace('%url%', $url, $tag);
@@ -111,7 +111,7 @@ class Assets
         }
         $html = '';
         $scope = $this->scopes[$scope];
-        foreach($scope as $file) {
+        foreach ($scope as $file) {
             $html .= $this->renderFile($file);
         }
         return $html;
@@ -130,5 +130,15 @@ class Assets
     public function styles()
     {
         return $this->block('styles');
+    }
+
+    public function useLayout($name)
+    {
+        \TAO::useLayout($name);
+    }
+
+    public function noLayout()
+    {
+        \TAO::useLayout('layouts.empty');
     }
 }

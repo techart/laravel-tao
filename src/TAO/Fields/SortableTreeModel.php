@@ -21,6 +21,8 @@ class SortableTreeModel extends TreeModel
             if (isset($fields[$field])) {
                 if ($fields[$field] === false) {
                     unset($fields[$field]);
+                } else {
+                    $fields[$field] = \TAO::merge($data, $fields[$field]);
                 }
             } else {
                 $fields[$field] = $data;
