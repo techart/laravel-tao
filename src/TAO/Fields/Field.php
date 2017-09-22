@@ -145,7 +145,7 @@ abstract class Field
     public function setFromRequest($request)
     {
         if ($request->has($this->name)) {
-            $this->item[$this->name] = $request->input($this->name);
+            $this->item[$this->name] = is_null($request->input($this->name))? '' : $request->input($this->name);
         }
     }
 
