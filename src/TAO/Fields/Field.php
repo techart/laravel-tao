@@ -145,7 +145,7 @@ abstract class Field
     public function setFromRequest($request)
     {
         if ($request->has($this->name)) {
-            $this->item[$this->name] = is_null($request->input($this->name))? '' : $request->input($this->name);
+            $this->item[$this->name] = is_null($request->input($this->name)) ? '' : $request->input($this->name);
         }
     }
 
@@ -204,17 +204,126 @@ abstract class Field
         return $this->item->accessEdit($user);
     }
 
+    /**
+     * @return mixed
+     */
+
     public function value()
     {
         return $this->item[$this->name];
     }
 
     /**
-     * @return mixed
+     *
+     * Имя дефолтного шаблона для рендера аутпута. Если возвращает false, то аутпут по умолчанию рендерится без шаблона
+     *
+     * @return string|bool
      */
-    public function render()
+
+    protected function defaultTemplate()
     {
-        return $this->value();
+        return false;
+    }
+
+    /**
+     *
+     * Дефолтный контекст, который передается в шаблон аутпута
+     *
+     * @return array
+     */
+
+    protected function defaultContext()
+    {
+        return [
+            'field' => $this,
+            'item' => $this->item,
+        ];
+    }
+
+    /**
+     *
+     * Рендер значения
+     *
+     * @param $arg1 - имя шаблона или контекст (если шаблон стандартный)
+     * $param $arg2 - контекст
+     *
+     * @return string
+     */
+    public function render($arg1 = false, $arg2 = false)
+    {
+        $template = $this->defaultTemplate();
+        if (is_string($arg1)) {
+            $template = $arg1;
+        } elseif (isset($this->data['template'])) {
+            $template = $this->data['template'];
+        }
+        if ($template) {
+            $context = $this->defaultContext();
+            if (is_array($arg1)) {
+                $context = array_merge($context, $arg1);
+            } elseif (is_array($arg2)) {
+                $context = array_merge($context, $arg2);
+            }
+            return view($template, $context);
+        } else {
+            return $this->value();
+        }
+    }
+
+
+    /**
+     *
+     * Имя дефолтного шаблона для рендера инпута в форме
+     *
+     * @return string
+     */
+    public function defaultInputTemplate()
+    {
+        if (isset($this->data['input_template'])) {
+            return $this->data['input_template'];
+        }
+        return "fields ~ {$this->type}.input";
+    }
+
+    /**
+     *
+     * Дефолтный контекст, который передается в шаблон инпута
+     *
+     * @return array
+     */
+    public function defaultInputContext()
+    {
+        return $this->defaultContext();
+    }
+
+    /**
+     *
+     * Рендер инпута в форме
+     *
+     * @param $arg1 - имя шаблона или контекст (если шаблон стандартный)
+     * $param $arg2 - контекст
+     *
+     * @return string
+     */
+    public function renderInput($arg1 = false, $arg2 = false)
+    {
+        $template = $this->defaultInputTemplate();
+        if (is_string($arg1)) {
+            $template = $arg1;
+        } elseif (isset($this->data['input_template'])) {
+            $template = $this->data['input_template'];
+        }
+        if ($template) {
+            $context = $this->defaultInputContext();
+            if (is_array($arg1)) {
+                $context = array_merge($context, $arg1);
+            } elseif (is_array($arg2)) {
+                $context = array_merge($context, $arg2);
+            }
+            return view($template, $context);
+        } else {
+            return 'No input template for field ' . get_class($this);
+        }
     }
 
 
@@ -303,37 +412,6 @@ abstract class Field
     public function renderForAdminList()
     {
         return $this->render();
-    }
-
-    /**
-     * @return bool
-     */
-    public function templateForInput()
-    {
-        return false;
-    }
-
-    /**
-     * @return array
-     */
-    public function prepareInput()
-    {
-        return array(
-            'field' => $this,
-            'item' => $this->item,
-        );
-    }
-
-    /**
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View|string
-     */
-    public function renderInput()
-    {
-        $template = $this->templateForInput();
-        if ($template) {
-            return view($template, $this->prepareInput());
-        }
-        return 'No template for field ' . get_class($this);
     }
 
     /**
@@ -474,7 +552,6 @@ abstract class Field
         }
         return '#';
     }
-
 
     /**
      * @return mixed

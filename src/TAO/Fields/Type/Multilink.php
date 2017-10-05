@@ -115,9 +115,4 @@ class Multilink extends Field
     {
         return app()->make($this->relatedModelClass());
     }
-
-    public function templateForInput()
-    {
-        return 'fields ~ multilink';
-    }
 }

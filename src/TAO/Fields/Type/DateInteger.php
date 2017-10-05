@@ -36,9 +36,16 @@ class DateInteger extends Field
         return empty($style) ? 'width:200px' : $style;
     }
 
-    public function render($format = 'd.m.Y')
+    protected function defaultContext()
     {
-        return date($format, $this->value());
+        $context = parent::defaultContext();
+        $context['format'] = 'd.m.Y';
+        return $context;
+    }
+
+    protected function defaultTemplate()
+    {
+        return 'fields ~ date_integer.output';
     }
 
     public function generateFormat()
@@ -74,10 +81,5 @@ class DateInteger extends Field
         if ($request->has($this->name)) {
             $this->set($request->input($this->name));
         }
-    }
-
-    public function templateForInput()
-    {
-        return 'fields ~ date_integer';
     }
 }

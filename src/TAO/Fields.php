@@ -10,22 +10,11 @@ class Fields
 {
     protected $schemaWasUpdated = array();
     protected $parsedTypes = array();
-    protected $classes = array(
-        'string' => 'StringField',
-        'remember_token' => 'RememberToken',
-        'date_integer' => 'DateInteger',
-        'Integer', 'Text', 'Checkbox', 'Password', 'Multilink', 'Select', 'Upload', 'Image');
+    protected $classes = array();
 
     public function init()
     {
-        $classes = $this->classes;
-        $this->classes = array();
-        foreach ($classes as $name => $class) {
-            if (is_numeric($name)) {
-                $name = strtolower($class);
-            }
-            $this->classes[$name] = "\\TAO\\Fields\\Type\\{$class}";
-        }
+        $this->classes = config('tao.fields', []);
     }
 
     public function add($name, $class)

@@ -58,6 +58,9 @@ class Upload extends Field
             $info = json_decode(\Storage::get("{$path}/info.json"));
             $this->delete();
             $dest = $this->destinationPath($info);
+            if (\Storage::exists($dest)) {
+                \Storage::delete($dest);
+            }
             \Storage::copy("{$path}/file", $dest);
             \Storage::delete("{$path}/info.json");
             \Storage::delete("{$path}/file");
@@ -237,11 +240,10 @@ class Upload extends Field
         return \Storage::url($file);
     }
 
-    /**
-     * @return string
-     */
-    public function templateForInput()
+    public function renderForAdminList()
     {
-        return 'fields ~ upload';
+        $url = $this->url();
+        $value = $this->value();
+        return "<a href='{$url}'>{$value}</a>";
     }
 }

@@ -14,11 +14,6 @@ class Text extends StringField
         return $table->$method($this->name);
     }
     
-    public function templateForInput()
-    {
-        return 'fields ~ text';
-    }
-    
     public function styleForAdminInput()
     {
         $style = parent::styleForAdminInput();

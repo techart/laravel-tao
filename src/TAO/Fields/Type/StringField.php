@@ -12,9 +12,4 @@ class StringField extends Field
         $len = $this->typeParamsIntArg(250);
         return $table->string($this->name, $len);
     }
-    
-    public function templateForInput()
-    {
-        return 'fields ~ string';
-    }
 }

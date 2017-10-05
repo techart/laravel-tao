@@ -2,22 +2,11 @@
 
 namespace TAO\Fields\Utils\Model;
 
+use Illuminate\Database\Eloquent\Builder;
+
 trait Urls
 {
-    protected $urlCode = false;
     protected $baseListUrl = false;
-    protected $pagerVar = 'page';
-
-    public function urlCode($value)
-    {
-        $this->urlCode = $value;
-        return $this;
-    }
-
-    public function getUrlCode()
-    {
-        return $this->urlCode? $this->urlCode : $this->getDatatype();
-    }
 
     public function baseListUrl($value)
     {
@@ -29,15 +18,9 @@ trait Urls
     {
         $url = $this->baseListUrl;
         if (!$url) {
-            $url = '/'.$this->getUrlCode().'/';
+            $url = '/'.$this->getDatatype().'/';
         }
         return $url;
-    }
-
-    public function pagerVar($value)
-    {
-        $this->pagerVar = $value;
-        return $this;
     }
 
     public function listUrl($page = 1)
@@ -46,7 +29,7 @@ trait Urls
         if ($page==1) {
             return $url;
         }
-        return rtrim($url,'/')."/{$this->pagerVar}-{$page}/";
+        return rtrim($url,'/')."/page-{$page}/";
     }
 
     public function itemUrl($id)
@@ -59,20 +42,50 @@ trait Urls
         return false;
     }
 
-    public function listRoutes()
+    public function routePageById($data = [])
     {
-        $baseUrl = $this->getBaseListUrl();
-        $pageUrl = $this->listUrl('{page}');
-
-        \Route::any($baseUrl, function() {
-            return $this->renderListPage(1);
-        });
-
-        if ($pageUrl) {
-            \Route::any($pageUrl, function($page) {
-                return $this->renderListPage($page);
-            })->where('page','^\d+$');
-        }
+        $data['base'] = $base = isset($data['base'])? $data['base'] : $this->getDatatype();
+        \Route::any("/{$base}/{id}/", function($id) use($data) {
+            $data['id'] = $id;
+            return $this->renderItemPage($data);
+        })->where('id','^\d+$');
     }
 
+    public function routePageByUrl($data = [])
+    {
+        $request = app()->request();
+        $url = $request->getPathInfo();
+        $selector = isset($data['selector'])? $data['selector'] : 'getItemByUrl';
+        $mode = isset($data['mode'])? $data['mode'] : 'full';
+        $item = $this->$selector($url);
+        if ($item instanceof Builder) {
+            $item = $item->first();
+        }
+        if ($item) {
+            $data['item'] = $item;
+            $data['mode'] = $mode;
+            \Route::any($url, function() use($item, $data) {
+                return $this->renderItemPage($data);
+            });
+        }
+        return $this;
+    }
+
+    public function routeListing($data = [])
+    {
+        $data['base'] = $base = isset($data['base'])? $data['base'] : $this->getDatatype();
+        $pages = isset($data['pages'])? $data['pages'] : true;
+        $data['selector'] = $selector = isset($data['selector'])? $data['selector'] : 'getItems';
+        \Route::any("/{$base}/", function() use($data) {
+            $data['page'] = 1;
+            return $this->renderListPage($data);
+        });
+        if ($pages) {
+            \Route::any("/{$base}/page-{page}/", function($page) use($data) {
+                $data['page'] = $page;
+                return $this->renderListPage($data);
+            })->where('page','^\d+$');
+        }
+        return $this;
+    }
 }

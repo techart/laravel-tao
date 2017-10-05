@@ -355,4 +355,21 @@ abstract class Model extends \Illuminate\Database\Eloquent\Model
         }
         return $dir;
     }
+
+    public function getItemByUrl($url)
+    {
+        return $this->where('url', $url)->where('isactive', 1);
+    }
+
+    public function getItemById($id)
+    {
+        $item = $this->find($id);
+        return $item->isactive? $item : null;
+    }
+
+    public function getItems($data = [])
+    {
+        return $this->ordered()->where('isactive', 1);
+    }
+
 }

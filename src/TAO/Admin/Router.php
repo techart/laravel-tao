@@ -7,6 +7,7 @@ class Router extends \TAO\Router
     public $path;
     public $datatype;
     public $datatypeCode;
+    public $vars;
 
     public function route($request)
     {
@@ -29,6 +30,17 @@ class Router extends \TAO\Router
                     $controller = $datatype->adminController();
                     app()->router->any("/admin/datatype/{$code}", $controller);
                 }
+            }
+            elseif ($m = app()->tao->regexp('{^vars/([^/]+)$}', $path)) {
+                $group = $m[1];
+                $this->vars = config("vars.{$group}", false);
+                if (is_array($this->vars)) {
+                    app()->router->any("/admin/vars/{$group}", '\\TAO\\Admin\\VarsController@index');
+                }
+            }
+            elseif ($path=='vars') {
+                $this->vars = config("vars", []);
+                app()->router->any("/admin/vars", '\\TAO\\Admin\\VarsController@entryPointAction');
             }
         }
 

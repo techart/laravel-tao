@@ -52,7 +52,7 @@ trait Table
             'can_delete' => $this->canDelete,
             'can_copy' => $this->canCopy,
             'add_text' => $this->datatype()->adminAddButtonText(),
-            'with_filter' => true,
+            'with_filter' => false,
             'with_row_actions' => ($this->canEdit || $this->canDelete || $this->canCopy),
             'pager_callback' => array($this, 'pageUrl'),
             'page' => $this->page,

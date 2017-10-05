@@ -21,14 +21,6 @@ class Password extends StringField
     }
 
     /**
-     * @return string
-     */
-    public function templateForInput()
-    {
-        return 'fields ~ password';
-    }
-
-    /**
      * @return null|string
      */
     public function styleForAdminInput()

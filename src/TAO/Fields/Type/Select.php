@@ -37,15 +37,10 @@ class Select extends Field
         return \TAO::itemsForSelect($src);
     }
 
-    public function prepareInput()
+    public function defaultInputContext()
     {
-        $data = parent::prepareInput();
+        $data = parent::defaultInputContext();
         $data['items'] = $this->items();
         return $data;
-    }
-
-    public function templateForInput()
-    {
-        return 'fields ~ select';
     }
 }

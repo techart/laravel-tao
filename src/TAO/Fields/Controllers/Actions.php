@@ -38,7 +38,7 @@ trait Actions
         $this->filter = \Request::has('filter') ? \Request::input('filter') : array();
         $this->order = \Request::has('order') ? \Request::input('order') : array();
         $this->page = \Request::has('page') ? (int)\Request::input('page') : 1;
-        $this->id = \Request::has('id') ? (int)\Request::input('id') : null;
+        $this->id = \Request::has('id') ? \Request::input('id') : null;
         $method = "{$this->action}Action";
 
         return $this->$method();

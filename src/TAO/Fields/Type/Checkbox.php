@@ -17,11 +17,6 @@ class Checkbox extends Field
         return 0;
     }
     
-    public function templateForInput()
-    {
-        return 'fields ~ checkbox';
-    }
-    
     public function checked()
     {
         return $this->item[$this->name];

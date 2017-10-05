@@ -88,34 +88,6 @@ abstract class PageModel extends Model
         );
     }
 
-    public function viewController()
-    {
-        return \TAO\Fields\Controllers\View::class;
-    }
-
-    public function templateFor($mode)
-    {
-        $code = $this->getDatatype();
-        return "datatype ~ {$code}.{$mode}";
-    }
-
-    public function templateForPage()
-    {
-        return $this->templateFor('full');
-    }
-
-    public function automaticRoutes()
-    {
-        $request = app()->request();
-        $url = $request->getPathInfo();
-        $item = $this->where('url', $url)->where('isactive', 1)->first();
-        if ($item) {
-            \Route::any($url, function() use($item) {
-                return $this->renderItemPage($item);
-            });
-        }
-    }
-
     public function url()
     {
         $url = trim($this->field('url')->value());
@@ -128,7 +100,7 @@ abstract class PageModel extends Model
     public function itemUrl($item)
     {
         $id = is_object($item)? $item->getKey() : $item;
-        $url =  '/'.$this->getUrlCode()."/{$id}/";
+        $url =  '/'.$this->getDatatype()."/{$id}/";
         return $url;
     }
 

@@ -22,6 +22,11 @@ class Page extends PageModel
         );
     }
 
+    public function automaticRoutes()
+    {
+        $this->routePageByUrl();
+    }
+
     public function adminMenuSection()
     {
         return 'Материалы';

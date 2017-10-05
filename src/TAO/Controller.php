@@ -25,7 +25,12 @@ class Controller extends BaseController
     protected function render($template, $context = array())
     {
         $context['controller'] = $this;
-        return view($template, $context);
+        return view($template, $this->setupContextForRender($context));
+    }
+
+    protected function setupContextForRender($context)
+    {
+        return $context;
     }
 
     protected function renderWithinLayout($template, $context = array())

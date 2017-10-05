@@ -49,7 +49,7 @@ class API extends \TAO\Controller
         $this->fieldName = \Request::get('field');
         $this->action = \Request::get('action');
         if (!empty($this->datatypeCode) && !empty($this->fieldName) && !empty($this->action)) {
-            $this->datatype = \TAO::datatype($this->datatypeCode);
+            $this->datatype = $this->datatypeCode=='_vars'? \TAO::vars() : \TAO::datatype($this->datatypeCode);
             if ($this->datatype) {
                 $this->item = $this->datatype;
                 $this->id = \Request::get('id');

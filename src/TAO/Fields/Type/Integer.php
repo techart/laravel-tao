@@ -25,9 +25,4 @@ class Integer extends Field
         $style = parent::styleForAdminInput();
         return empty($style) ? 'width:200px' : $style;
     }
-
-    public function templateForInput()
-    {
-        return 'fields ~ integer';
-    }
 }

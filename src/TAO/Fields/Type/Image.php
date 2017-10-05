@@ -46,9 +46,4 @@ class Image extends Upload
         $info['preview'] = $this->adminPreviewUrl();
         return true;
     }
-
-    public function templateForInput()
-    {
-        return 'fields ~ image';
-    }
 }

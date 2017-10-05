@@ -338,4 +338,16 @@ class TAO
         }
         return $a;
     }
+
+    public function vars($name = false)
+    {
+        static $storage = false;
+        if (!$storage) {
+            $storage = app()->make('\\TAO\\Vars\\Storage');
+        }
+        if ($name) {
+            return $storage->get($name);
+        }
+        return $storage;
+    }
 }

@@ -18,5 +18,5 @@
             Загрузить
         @endif
     </a>
-    @include('fields ~ _ajax-upload-script')
+    @include('fields ~ upload._ajax-upload-script')
 </div>

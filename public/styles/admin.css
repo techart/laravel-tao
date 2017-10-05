@@ -220,6 +220,13 @@ h1.main {
   color: #777;
 }
 
+.block-simple .block-content h2 {
+  font-size:20px;
+  font-weight: normal;
+  margin: 0 0 10px 0;
+  color: #777;
+}
+
 .right-buttons {
   text-align: right;
 }
