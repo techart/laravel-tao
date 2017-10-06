@@ -27,7 +27,7 @@ trait View
         $data['page'] = $page = isset($data['page'])? $data['page'] : 1;
         $data['per_page'] = $perPage = isset($data['per_page'])? $data['per_page'] : 10;
         $data['mode'] = $mode = isset($data['mode'])? $data['mode'] : 'list';
-        $data['selector'] = $selector = isset($data['selector'])? $data['selector'] : 'getItems';
+        $data['listing'] = $selector = isset($data['listing'])? $data['listing'] : 'getItems';
         $data['pager_callback'] = isset($data['pager_callback'])? $data['pager_callback'] : [$this, 'listUrl'];
         if (isset($data['base'])) {
             $this->baseListUrl('/'.$data['base'].'/');

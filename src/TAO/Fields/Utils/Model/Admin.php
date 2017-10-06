@@ -32,7 +32,7 @@ trait Admin
      */
     public function adminTitle()
     {
-        return $this->adminTitle? $this->adminTitle: get_class($this);
+        return $this->adminTitle? $this->adminTitle: $this->typeTitle();
     }
 
     /**

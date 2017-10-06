@@ -41,7 +41,7 @@ class News extends PageModel
         return 'Материалы';
     }
 
-    public function adminTitle()
+    public function typeTitle()
     {
         return 'Новости';
     }

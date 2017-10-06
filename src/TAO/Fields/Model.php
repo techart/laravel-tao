@@ -43,6 +43,8 @@ abstract class Model extends \Illuminate\Database\Eloquent\Model
 
     public $nextBranch = false;
 
+    public $typeTitle = false;
+
     /**
      * @var string
      */
@@ -81,6 +83,9 @@ abstract class Model extends \Illuminate\Database\Eloquent\Model
         }
         $this->updateSchemaIfNecessary();
         $this->setupFields();
+        if (!$this->typeTitle) {
+            $this->typeTitle = get_class($this);
+        }
     }
 
     /**
@@ -370,6 +375,20 @@ abstract class Model extends \Illuminate\Database\Eloquent\Model
     public function getItems($data = [])
     {
         return $this->ordered()->where('isactive', 1);
+    }
+
+    public function typeTitle()
+    {
+        return $this->typeTitle;
+    }
+
+    public function selector()
+    {
+        $selector = app()->make(\TAO\Selector::class);
+        $selector->mnemocode = $this->getDatatype();
+        $selector->datatype = $this;
+        $selector->title = $this->typeTitle();
+        return $selector;
     }
 
 }

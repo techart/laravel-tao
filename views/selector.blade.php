@@ -4,7 +4,9 @@
     <h1>{{ $title }}</h1>
     @include('pager ~ site')
     @foreach($rows as $row)
-        {!! $row->viewMode($mode)->render() !!}
+        {!! $row->render([
+            'mode' => $row_mode,
+        ]) !!}
     @endforeach
     @include('pager ~ site')
 @endsection
