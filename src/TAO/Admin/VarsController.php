@@ -97,7 +97,7 @@ class VarsController extends AdminController
         }
 
         foreach ($this->groups as $code => $data) {
-            if (count($data['vars']) == 0) {
+            if (!isset($data['vars']) || count($data['vars']) == 0) {
                 unset($this->groups[$code]);
             }
         }
