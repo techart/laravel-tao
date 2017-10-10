@@ -38,7 +38,8 @@ class TableController extends AdminController
 
     protected function titleEdit()
     {
-        return $this->datatype()->adminTitleEdit();
+        $item = empty($this->editItem)? $this->datatype() : $this->editItem;
+        return $item->adminTitleEdit();
     }
 
     protected function titleAdd()
@@ -74,6 +75,7 @@ class TableController extends AdminController
     protected function selectRows()
     {
         return $this->filteredDatatype()
+            ->ordered()
             ->limit($this->perPage())
             ->offset(($this->currentPage()-1)*$this->perPage())
             ->get();
