@@ -35,7 +35,7 @@ class Router extends \TAO\Router
                 $group = $m[1];
                 $this->vars = config("vars.{$group}", false);
                 if (is_array($this->vars)) {
-                    app()->router->any("/admin/vars/{$group}", '\\TAO\\Admin\\VarsController@index');
+                    app()->router->any("/admin/vars/{$group}", '\\TAO\\Admin\\VarsController@entryPointAction');
                 }
             }
             elseif ($path=='vars') {
