@@ -53,11 +53,11 @@ class Admin
                         'sub' => array(),
                     );
                 }
+                $menu[$section]['sub'][] = array(
+                    'title' => $title,
+                    'url' => $url,
+                );
             }
-            $menu[$section]['sub'][] = array(
-                'title' => $title,
-                'url' => $url,
-            );
         }
         return $menu;
     }
