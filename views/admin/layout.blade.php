@@ -82,6 +82,7 @@
 
         <script src="/tao/scripts/bootstrap.min.js"></script>
         {!! Assets::bottomScripts() !!}
+        {!! Assets::textBlock('bottom') !!}
     </body>
 
 </html>

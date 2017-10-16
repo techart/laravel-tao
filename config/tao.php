@@ -19,6 +19,12 @@
         'upload' => \TAO\Fields\Type\Upload::class,
         'image' => \TAO\Fields\Type\Image::class,
     ],
+
+	'text' => [
+		'processors' => [
+			'markdown' => \TAO\Text\Processor\Parser\Markdown::class
+		]
+	],
     
     'datatypes' => [
         'users' => \TAO\Fields\Model\User::class,

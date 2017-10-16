@@ -210,7 +210,20 @@ abstract class Field
 
     public function value()
     {
-        return $this->item[$this->name];
+        return $this->prepareValue($this->rawValue());
+    }
+
+	public function rawValue()
+	{
+		return $this->item[$this->name];
+	}
+
+    protected function prepareValue($value)
+    {
+		if (isset($this->data['prepare_value']) && is_callable($this->data['prepare_value'])) {
+			$value = call_user_func_array($this->data['prepare_value'], [$value, $this]);
+		}
+		return $value;
     }
 
     /**
@@ -237,6 +250,7 @@ abstract class Field
         return [
             'field' => $this,
             'item' => $this->item,
+            'settings' => $this->data,
         ];
     }
 

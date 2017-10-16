@@ -6,6 +6,7 @@ class Assets
 {
     protected $meta = array();
     protected $scopes = array();
+    protected $textBlocks = array();
 
     public function init()
     {
@@ -94,7 +95,7 @@ class Assets
                 $tag = config("tao.jstag", '<script src="%url%"></script>' . "\n");
             }
             if ($type == 'css') {
-                $tag = config("tao.csstag", '<link type="text/css" href="%url%">' . "\n");
+                $tag = config("tao.csstag", '<link href="%url%" rel="stylesheet" media="screen">' . "\n");
             }
             if (!empty($tag)) {
                 $tag = str_replace('%url%', $url, $tag);
@@ -102,6 +103,24 @@ class Assets
             }
         }
         return '';
+    }
+
+    public function addLine($block, $line)
+    {
+        if (!isset($this->textBlocks[$block])) {
+            $this->textBlocks[$block] = '';
+        }
+        $this->textBlocks[$block] .= "\n{$line}";
+    }
+
+    public function addBottomLine($line)
+    {
+        $this->addLine('bottom', $line);
+    }
+
+    public function textBlock($block)
+    {
+        return isset($this->textBlocks[$block])? $this->textBlocks[$block] : '';
     }
 
     public function block($scope)
