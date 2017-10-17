@@ -1,6 +1,6 @@
 @if ($with_datepicker)
-  {{ \Assets::useBottomScript('//ajax.aspnetcdn.com/ajax/jquery.ui/1.10.3/jquery-ui.min.js') }}
-  {{ \Assets::useFile('http://ajax.aspnetcdn.com/ajax/jquery.ui/1.10.3/themes/smoothness/jquery-ui.css') }}
+  {{ \Assets::useBottomScript('/tao/scripts/jquery-ui.min.js') }}
+  {{ \Assets::useFile('/tao/styles/jquery-ui.css') }}
   {{ \Assets::addBottomLine('<script>$(function() {$(".date_input_'.$field->name.'").datepicker({dateFormat: "dd.mm.yy"});});</script>') }}
 @endif
 <input
