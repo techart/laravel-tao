@@ -67,7 +67,9 @@ class DateInteger extends Field
 
     public function set($value)
     {
-        if ($m = \TAO::regexp('{^(\d+)\.(\d+)\.(\d+)$}', $value)) {
+        if (trim($value)=='') {
+            $value = 0;
+        } elseif ($m = \TAO::regexp('{^(\d+)\.(\d+)\.(\d+)$}', $value)) {
             $value = mktime(0, 0, 0, $m[2], $m[1], $m[3]);
         } elseif ($m = \TAO::regexp('{^(\d+)\.(\d+)\.(\d+)\s*-\s*(\d+):(\d+)$}', $value)) {
             $value = mktime($m[4], $m[5], 0, $m[2], $m[1], $m[3]);
