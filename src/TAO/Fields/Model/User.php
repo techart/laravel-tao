@@ -26,4 +26,15 @@ class User extends AbstractUser
     protected $hidden = [
         'password', 'remember_token',
     ];
+
+    public function loginUrl()
+    {
+        return '/users/login/';
+    }
+
+    public function loginController()
+    {
+        return \TAO\Users\LoginController::class;
+    }
+
 }

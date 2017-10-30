@@ -14,8 +14,8 @@ class Router extends \TAO\Router
         $paths = array(
             resource_path("{$path}/index.php"),
             resource_path("{$path}.php"),
-            __DIR__."/../../{$path}/index.php",
-            __DIR__."/../../{$path}.php",
+            __DIR__."/../../../{$path}/index.php",
+            __DIR__."/../../../{$path}.php",
         );
         foreach($paths as $fpath) {
             if (is_file($fpath)) {

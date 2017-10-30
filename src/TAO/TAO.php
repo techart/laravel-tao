@@ -125,6 +125,14 @@ class TAO
 
     public function routes()
     {
+        if (config('auth.public.login', false)) {
+            $controller = '\\'.(\TAO::datatype('users')->loginController());
+            $urlLogin = \TAO::datatype('users')->loginUrl();
+            \Route::get($urlLogin, "{$controller}@showLoginForm");
+            \Route::post($urlLogin, "{$controller}@login");
+            \Route::get('/users/logout/', "{$controller}@logout");
+
+        }
         /*
                 $this->get('login', 'Auth\LoginController@showLoginForm')->name('login');
                 $this->post('login', 'Auth\LoginController@login');
@@ -324,6 +332,9 @@ class TAO
                 return \TAO::datatype(trim($m[1]))->itemsForSelect($args);
             }
         }
+        if (is_callable($src)) {
+            return call_user_func($src);
+        }
         return array();
     }
 
@@ -349,5 +360,21 @@ class TAO
             return $storage->get($name);
         }
         return $storage;
+    }
+
+    public function authorized($callback = false)
+    {
+        $user = \Auth::user();
+        if (is_object($user)) {
+            if (is_callable($callback)) {
+                return call_user_func($callback);
+            }
+            return true;
+        } else {
+            if (is_callable($callback)) {
+                return redirect('/users/login/');
+            }
+            return false;
+        }
     }
 }

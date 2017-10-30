@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use TAO\Fields;
 use Ramsey\Uuid\Uuid;
+use TAO\Type\Collection;
 
 /**
  * Class Model
@@ -173,10 +174,19 @@ abstract class Model extends \Illuminate\Database\Eloquent\Model
      * @return mixed
      * @throws Exception\UndefinedField
      */
-    public function field($name)
+    public function field($name, $forceType = false)
     {
+        if ($forceType) {
+            $fields = $this->processedFields();
+            if (!isset($fields[$name])) {
+                throw new Fields\Exception\UndefinedField($name, get_class($this));
+            }
+            $data = $fields[$name];
+            $data['type'] = $forceType;
+            return app()->taoFields->create($name, $data, $this);
+        }
         if (!isset($this->fields[$name])) {
-            $fields = $this->calculatedFields();
+            $fields = $this->processedFields();
             if (!isset($fields[$name])) {
                 throw new Fields\Exception\UndefinedField($name, get_class($this));
             }
@@ -240,13 +250,11 @@ abstract class Model extends \Illuminate\Database\Eloquent\Model
      */
     public function itemsForSelect($args = false)
     {
+        $args = Collection::parseString($args);
         if ($this->isTree) {
             return $this->treeForSelect($args);
         }
-        $out = [];
-        if (is_string($args) && $m = \TAO::regexp('{(.+)=(.+)}', $args)) {
-            $out[$m[1]] = $m[2];
-        }
+        $out = Collection::numericKeysOnly($args);
         foreach ($this->allRows() as $row) {
             $out[$row->getKey()] = $row->title();
         }
@@ -257,14 +265,12 @@ abstract class Model extends \Illuminate\Database\Eloquent\Model
      * @param bool $args
      * @return array
      */
-    public function treeForSelect($args = false)
+    public function treeForSelect($args = [])
     {
+        $args = Collection::parseString($args);
+        $tree = $this->buildTree($args);
 
-        $tree = $this->buildTree();
-
-        if (is_string($args) && $m = \TAO::regexp('{(.+)=(.+)}', $args)) {
-            $out = [$m[1] => $m[2]];
-        }
+        $out = Collection::numericKeysOnly($args);
         $this->buildTreeForSelect($tree, '-&nbsp;&nbsp;&nbsp;', $out);
         return $out;
     }
@@ -285,10 +291,11 @@ abstract class Model extends \Illuminate\Database\Eloquent\Model
     /**
      * @return array
      */
-    public function buildTree()
+    public function buildTree($filter = [])
     {
         $rows = $this->allRows();
-        return $this->buildTreeBranch(0, $rows);
+        $root = isset($filter['root'])? $filter['root'] : 0;
+        return $this->buildTreeBranch($root, $rows, (isset($filter['max_depth'])? $filter['max_depth'] : 10000));
     }
 
     /**
@@ -296,7 +303,7 @@ abstract class Model extends \Illuminate\Database\Eloquent\Model
      * @param $src
      * @return array
      */
-    public function buildTreeBranch($root, &$src)
+    public function buildTreeBranch($root, &$src, $maxDepth = 10000)
     {
         $out = [];
         $first = true;
@@ -314,7 +321,9 @@ abstract class Model extends \Illuminate\Database\Eloquent\Model
                     $prev->isLastBranch = false;
                 }
 
-                $row->childs = $this->buildTreeBranch($key, $src);
+                if ($maxDepth>0) {
+                    $row->childs = $this->buildTreeBranch($key, $src, $maxDepth-1);
+                }
                 $out[$key] = $row;
                 $prev = $row;
                 $row->isLastBranch = true;
@@ -330,13 +339,13 @@ abstract class Model extends \Illuminate\Database\Eloquent\Model
             return false;
         }
         if (is_int($id)) {
-            $p1 = str_pad(floor($id/1000), 4, '0', STR_PAD_LEFT);
+            $p1 = str_pad(floor($id / 1000), 4, '0', STR_PAD_LEFT);
             $p2 = str_pad($id, 8, '0', STR_PAD_LEFT);
         } else {
             $p1 = substr($id, 0, 2);
             $p2 = $id;
         }
-        return 'datatypes/'.$this->getDatatype()."/{$p1}/{$p2}";
+        return 'datatypes/' . $this->getDatatype() . "/{$p1}/{$p2}";
     }
 
     public function getHomeDir()
@@ -369,7 +378,7 @@ abstract class Model extends \Illuminate\Database\Eloquent\Model
     public function getItemById($id)
     {
         $item = $this->find($id);
-        return $item->isactive? $item : null;
+        return $item->isactive ? $item : null;
     }
 
     public function getItems($data = [])
@@ -389,6 +398,31 @@ abstract class Model extends \Illuminate\Database\Eloquent\Model
         $selector->datatype = $this;
         $selector->title = $this->typeTitle();
         return $selector;
+    }
+
+    public function validateField($name)
+    {
+        $cname = ucfirst(camel_case($name));
+        $method = "validateField{$cname}";
+        if (method_exists($this, $method)) {
+            return $this->$method();
+        }
+        return $this->field($name)->validate();
+    }
+
+    public function validate()
+    {
+        foreach ($this->calculatedFields() as $name => $data) {
+            $v = $this->validateField($name);
+            if (is_string($v)) {
+                $this->error($v, $name);
+            }
+        }
+    }
+
+    public function validateForAdmin()
+    {
+        return $this->validate();
     }
 
 }

@@ -64,7 +64,9 @@ trait Table
      */
     public function treeAction()
     {
-        $tree = $this->datatype()->buildTree();
+        $filter = $this->filter;
+        $filter['max_depth'] = $this->datatype()->adminMaxDepth();
+        $tree = $this->datatype()->buildTree($filter);
         $this->prepareTree($tree);
 
         return $this->render('table ~ list.tree', [

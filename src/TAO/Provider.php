@@ -38,6 +38,25 @@ class Provider extends ServiceProvider
             return new \TAO\View\Finder($app['files'], $app['config']['view.paths']);
         });
 
+        $this->app->singleton('url', function ($app) {
+            $routes = $app['router']->getRoutes();
+            $app->instance('routes', $routes);
+
+            $url = new UrlGenerator($routes, $app->rebinding('request', function ($app, $request) {
+                $app['url']->setRequest($request);
+            }));
+
+            $url->setSessionResolver(function () {
+                return $this->app['session'];
+            });
+
+            $app->rebinding('routes', function ($app, $routes) {
+                $app['url']->setRoutes($routes);
+            });
+
+            return $url;
+        });
+
         $this->app->singleton('session', function ($app) {
             return new \TAO\Session\Manager($app);
         });

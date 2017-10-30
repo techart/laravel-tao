@@ -1,6 +1,7 @@
 <?php
 
 namespace TAO;
+
 use Illuminate\Contracts\View\Factory as ViewFactory;
 
 class Admin
@@ -35,16 +36,16 @@ class Admin
     public function layout()
     {
         $factory = app(ViewFactory::class);
-        return $factory->exists('layouts.admin')? 'layouts.admin' : 'tao::admin.layout';
+        return $factory->exists('layouts.admin') ? 'layouts.admin' : 'tao::admin.layout';
     }
 
     public function menu()
     {
         $menu = array();
-        foreach(\TAO::datatypes() as $code => $datatype) {
+        foreach (\TAO::datatypes() as $code => $datatype) {
             $section = $datatype->adminMenuSection();
             $title = $datatype->adminMenuTitle();
-            $url = '/admin/datatype/'.$code;
+            $url = '/admin/datatype/' . $code;
             if (is_string($section)) {
                 if (!isset($menu[$section])) {
                     $menu[$section] = array(

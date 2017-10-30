@@ -213,17 +213,17 @@ abstract class Field
         return $this->prepareValue($this->rawValue());
     }
 
-	public function rawValue()
-	{
-		return $this->item[$this->name];
-	}
+    public function rawValue()
+    {
+        return $this->item[$this->name];
+    }
 
     protected function prepareValue($value)
     {
-		if (isset($this->data['prepare_value']) && is_callable($this->data['prepare_value'])) {
-			$value = call_user_func_array($this->data['prepare_value'], [$value, $this]);
-		}
-		return $value;
+        if (isset($this->data['prepare_value']) && is_callable($this->data['prepare_value'])) {
+            $value = call_user_func_array($this->data['prepare_value'], [$value, $this]);
+        }
+        return $value;
     }
 
     /**
@@ -565,6 +565,40 @@ abstract class Field
             }
         }
         return '#';
+    }
+
+    public function publicLabel()
+    {
+        return $this->param('label', $this->item->typeTitle() . ':' . $this->name);
+    }
+
+    public function isPresent()
+    {
+        return !empty($this->value());
+    }
+
+    public function isMatch($regexp)
+    {
+        $value = $this->value();
+        return empty($value) || \TAO::regexp($regexp, $this->value());
+    }
+
+    public function validate()
+    {
+        if (isset($this->data['required'])) {
+            $req = $this->data['required'];
+            if ($req) {
+                if (!$this->isPresent()) {
+                    return $this->param(['error_message_required', 'error_message'], is_string($req) ? $req : 'Fill ' . $this->publicLabel());
+                }
+            }
+        }
+        if (isset($this->data['match'])) {
+            if (!$this->isMatch($this->data['match'])) {
+                return $this->param(['error_message_match', 'error_message'], 'Invalid ' . $this->publicLabel());
+            }
+        }
+        return true;
     }
 
     /**

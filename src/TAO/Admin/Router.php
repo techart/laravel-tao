@@ -30,15 +30,13 @@ class Router extends \TAO\Router
                     $controller = $datatype->adminController();
                     app()->router->any("/admin/datatype/{$code}", $controller);
                 }
-            }
-            elseif ($m = app()->tao->regexp('{^vars/([^/]+)$}', $path)) {
+            } elseif ($m = app()->tao->regexp('{^vars/([^/]+)$}', $path)) {
                 $group = $m[1];
                 $this->vars = config("vars.{$group}", false);
                 if (is_array($this->vars)) {
                     app()->router->any("/admin/vars/{$group}", '\\TAO\\Admin\\VarsController@entryPointAction');
                 }
-            }
-            elseif ($path=='vars') {
+            } elseif ($path == 'vars') {
                 $this->vars = config("vars", []);
                 app()->router->any("/admin/vars", '\\TAO\\Admin\\VarsController@entryPointAction');
             }

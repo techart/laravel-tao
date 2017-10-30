@@ -120,7 +120,7 @@ class Assets
 
     public function textBlock($block)
     {
-        return isset($this->textBlocks[$block])? $this->textBlocks[$block] : '';
+        return isset($this->textBlocks[$block]) ? $this->textBlocks[$block] : '';
     }
 
     public function block($scope)

@@ -15,7 +15,7 @@ class Finder extends FileViewFinder
     {
         if ($m = \TAO::regexp('{^table\s*~(.+)$}', $name)) {
             $name = app()->taoAdmin->tableView(trim($m[1]));
-        } elseif ($m = \TAO::regexp('{^(navigation|datatype|admin|pager|fields|vars)\s*~(.+)$}', $name)) {
+        } elseif ($m = \TAO::regexp('{^([a-z]+)\s*~(.+)$}', $name)) {
             $name = $this->findInTAO($m[1], trim($m[2]));
         } elseif ($m = \TAO::regexp('{^~\s*layout$}', $name)) {
             $name = app()->tao->layout;

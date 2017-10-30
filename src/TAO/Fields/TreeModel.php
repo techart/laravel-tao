@@ -2,6 +2,8 @@
 
 namespace TAO\Fields;
 
+use TAO\Type\Collection;
+
 class TreeModel extends Model
 {
 
@@ -15,7 +17,9 @@ class TreeModel extends Model
         $extra = array(
             'parent_id' => array(
                 'type' => 'select index',
-                'items' => 'datatype:categories/0=Корень',
+                'items' => function() {
+                    return $this->buildTreeForParentSelect();
+                },
                 'label' => 'Родитель',
                 'weight' => 100,
                 'in_list' => false,
@@ -46,6 +50,22 @@ class TreeModel extends Model
         return $fields;
     }
 
+    public function buildTreeForParentSelect()
+    {
+        $args = [0 => 'Корень'];
+        if (isset($_GET['filter']['root'])) {
+            $rootId = (int)$_GET['filter']['root'];
+            $rootItem = $this->find($rootId);
+            if ($rootItem) {
+                $args = [
+                    'root' => $rootId,
+                    $rootId => $rootItem->title(),
+                ];
+            }
+        }
+        return $this->treeForSelect($args);
+    }
+
     public function ordered()
     {
         return $this->orderBy('title');
@@ -55,6 +75,24 @@ class TreeModel extends Model
     {
         return array(
         );
+    }
+
+    public function adminMaxDepth()
+    {
+        return 10000;
+    }
+
+    public function adminTitleList()
+    {
+        $title = $this->adminTitle();
+        if (isset($_GET['filter']['root'])) {
+            $rootId = (int)$_GET['filter']['root'];
+            $rootItem = $this->find($rootId);
+            if ($rootItem) {
+                $title .= ': '. $rootItem->title();
+            }
+        }
+        return $title;
     }
 
     public function adminMenuSection()

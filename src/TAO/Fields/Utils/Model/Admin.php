@@ -13,7 +13,6 @@ trait Admin
     public $adminTitle = false;
 
 
-
     /**
      * @return string
      */
@@ -32,7 +31,7 @@ trait Admin
      */
     public function adminTitle()
     {
-        return $this->adminTitle? $this->adminTitle: $this->typeTitle();
+        return $this->adminTitle ? $this->adminTitle : $this->typeTitle();
     }
 
     /**
