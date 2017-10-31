@@ -11,5 +11,5 @@
       &nbsp;
     </div>
   @endif
-  {!! $row->title() !!}
+  {!! $row->titleForTreeAdmin($level) !!}
 </td>

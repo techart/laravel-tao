@@ -126,7 +126,7 @@ class TAO
     public function routes()
     {
         if (config('auth.public.login', false)) {
-            $controller = '\\'.(\TAO::datatype('users')->loginController());
+            $controller = '\\' . (\TAO::datatype('users')->loginController());
             $urlLogin = \TAO::datatype('users')->loginUrl();
             \Route::get($urlLogin, "{$controller}@showLoginForm");
             \Route::post($urlLogin, "{$controller}@login");
@@ -275,7 +275,28 @@ class TAO
 
     public function classModified($class)
     {
-        return true;
+        $name = is_string($class) ? $class : get_class($class);
+        $time = $this->getClassModifyTime($class);
+        $key = 'class-modify-' . str_replace('\\', '-', $name);
+        $cachedTime = \Cache::get($key, 0);
+        if ($time > $cachedTime) {
+            \Cache::put($key, $time, 500000);
+            return true;
+        }
+        return false;
+    }
+
+    public function getClassModifyTime($class)
+    {
+        $ref = $class instanceof \ReflectionClass ? $class : new \ReflectionClass($class);
+        $file = $ref->getFileName();
+        $time = filemtime($file);
+        $timeParent = 0;
+        $refParent = $ref->getParentClass();
+        if ($refParent) {
+            $timeParent = $this->getClassModifyTime($refParent);
+        }
+        return $time > $timeParent ? $time : $timeParent;
     }
 
     public function path($extra = false)

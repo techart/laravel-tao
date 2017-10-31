@@ -85,6 +85,7 @@ trait Schema
      */
     public function updateSchema()
     {
+        \Log::debug('Update schema for '. $this->getDatatype());
         $tableName = $this->getTable();
         if (!$this->dbSchema()->hasTable($tableName)) {
             $this->dbSchema()->create($tableName, function (Blueprint $table) {

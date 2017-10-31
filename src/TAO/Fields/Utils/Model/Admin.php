@@ -181,4 +181,14 @@ trait Admin
     {
         return 'Нет ни одной записи';
     }
+
+    public function titleForAdminList()
+    {
+        return $this->title();
+    }
+
+    public function titleForTreeAdmin($level = 0)
+    {
+        return $this->titleForAdminList();
+    }
 }
