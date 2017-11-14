@@ -219,12 +219,21 @@ abstract class Model extends \Illuminate\Database\Eloquent\Model
     }
 
     /**
+     * @param $builder
      * @param $filter
      * @return $this
      */
-    public function applyFilter($filter)
+    public function applyFilter($builder, $filter)
     {
-        return $this;
+        foreach ($filter as $name => $value) {
+            if (!empty($value)) {
+                $method = 'applyFilter'.camel_case($name);
+                if (method_exists($this, $method)) {
+                    $this->$method($builder, $value);
+                }
+            }
+        }
+        return $builder;
     }
 
     public function ordered()

@@ -213,10 +213,17 @@ body {
   padding-left: 2px;
 }
 
-h1.main {
+h1 {
   font-size:30px;
   font-weight: normal;
   margin: 0 0 10px 0;
+  color: #777;
+}
+
+h2 {
+  font-size:26px;
+  font-weight: normal;
+  margin: 5px 0 10px 0;
   color: #777;
 }
 
@@ -293,20 +300,20 @@ td.admin-tree-title {}
     vertical-align: middle;
     cursor: pointer;
   }
-  
+
     .controls a.p1 {
       left: -43px;
     }
-  
+
     .controls a.p2 {
       left: -20px;
     }
-    
+
     .controls a.control:hover {
       background-color: #eee;
       background-image: none;
     }
-  
+
     .controls a.control i {
       display: inline-block;
       padding: 0;
@@ -317,11 +324,11 @@ td.admin-tree-title {}
       margin-top: 1px;
       line-height: 14px;
     }
-    
+
       .controls a.control i.up {
         background-position: -289px -96px;
       }
-    
+
       .controls a.control i.down {
         background-position: -312px -96px;
       }
@@ -343,7 +350,87 @@ td.admin-tree-title {}
   .tao-fields-upload .preview {
     display: block;
   }
-  
+
   .tao-fields-upload .upload-error {
     color: red;
   }
+
+  .tao-fields-upload__btn {
+    display: inline-block;
+    position: relative;
+  }
+
+    .tao-fields-upload__btn .tao-fields-upload__file-input {
+      position: absolute;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: 1;
+    }
+
+.tao-fields-attaches {
+}
+
+  .tao-fields-attaches-filelist {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 5px 7px;
+  }
+
+    .tao-fields-attaches-filelist .entry {
+      display: inline-block;
+      margin: 0 10px 0 0;
+      padding: 2px 2px 2px 5px;
+      background-color: #eee;
+    }
+
+      .tao-fields-attaches-filelist .entry a.delete {
+        display: inline-block;
+        margin: 0 0 0 3px;
+        width: 16px;
+        height: 19px;
+        background-image: url(/tao/images/del16x16.png);
+        background-repeat: no-repeat;
+        background-position: 0 3px;
+        text-decoration: none;
+      }
+
+  .tao-fields-attaches__upload {
+    position: relative;
+    margin-top: 5px;
+  }
+
+    .tao-fields-attaches__upload .tao-fields-attaches__upload-input {
+      position: absolute;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: 1;
+    }
+
+.multilink-items {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 5px 7px;
+    background-color: #fff;
+}
+
+.unvisible {
+  display: none;
+}
+
+form.tao-filter {
+}
+
+  form.tao-filter .field-container {
+    margin: 10px 0;
+  }
+
+.tao-reset-filter-button {
+  float: right;
+  margin: 10px 0 0 0;
+}

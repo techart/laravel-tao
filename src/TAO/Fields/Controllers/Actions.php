@@ -65,6 +65,14 @@ trait Actions
         if ($this->page > 1) {
             $data['page'] = $this->page;
         }
+        if (isset($params['__no_filter'])) {
+            unset($data['filter']);
+            unset($params['__no_filter']);
+        }
+        if (isset($params['__no_page'])) {
+            unset($data['page']);
+            unset($params['__no_page']);
+        }
         $data = array_merge($data, $params);
         if (count($data) > 1) {
             $q = trim(http_build_query($data));

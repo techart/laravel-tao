@@ -16,6 +16,7 @@
         <![endif]-->
         <script src="/tao/scripts/jquery-1.9.1.min.js"></script>
         <script src="/tao/scripts/modernizr-2.6.2-respond-1.1.0.min.js"></script>
+        <script src="/tao/scripts/admin/index.js"></script>
         {!! Assets::scripts() !!}
     </head>
     
@@ -67,8 +68,8 @@
             
             <div class="row-fluid">
                 @hasSection('sidebar')
-                    <div class="span3 pull-right" id="content-sidebar">@yield('sidebar')</div>
-                    <div class="span9 pull-left" id="content">@yield('content')</div>
+                    <div class="{{ $sidebar_visible? 'span3' : 'unvisible' }} pull-right" id="content-sidebar">@yield('sidebar')</div>
+                    <div class="{{ $sidebar_visible? 'span9' : 'span12' }} pull-left" id="content">@yield('content')</div>
                 @else
                     <div class="span12" id="content">@yield('content')</div>
                 @endif

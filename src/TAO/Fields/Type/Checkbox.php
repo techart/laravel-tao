@@ -21,4 +21,9 @@ class Checkbox extends Field
     {
         return $this->item[$this->name];
     }
+
+    public function nullValue()
+    {
+        return 0;
+    }
 }

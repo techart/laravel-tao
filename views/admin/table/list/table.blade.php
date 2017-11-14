@@ -2,9 +2,9 @@
 
 @include('table ~ list.header')
 @include('table ~ list.right-buttons')
+@include('table ~ list.filter')
 
 @section('content')
-    
     @include('table ~ list.navigator-top')
 
     <div class="block-simple">

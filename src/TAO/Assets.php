@@ -30,6 +30,9 @@ class Assets
 
     public function useFile($file, $scope = false)
     {
+        if (empty($file)) {
+            return $this;
+        }
         if (is_string($file)) {
             $file = array(
                 'path' => $file,
@@ -159,5 +162,20 @@ class Assets
     public function noLayout()
     {
         \TAO::useLayout('layouts.empty');
+    }
+
+    public function frontend($name = false)
+    {
+        return \TAO::frontend($name);
+    }
+
+    public function useFrontendStyle($name, $params = [])
+    {
+        $this->frontend()->useStyle($name, $params);
+    }
+
+    public function useFrontendScript($name, $params = [])
+    {
+        $this->frontend()->useScript($name, $params);
     }
 }

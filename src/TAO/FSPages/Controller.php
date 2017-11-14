@@ -6,8 +6,7 @@ class Controller extends \TAO\Controller
 {
     public function index()
     {
-        $path = app()->tao->router->path;dd($path);
-        return $this->render($path);
+        return $this->render(app()->tao->router->path);
     }
 
     public function index2()

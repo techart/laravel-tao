@@ -13,6 +13,18 @@ class Finder extends FileViewFinder
      */
     public function find($name)
     {
+        if (is_string($name) && strpos($name, '#') !== false) {
+            $path = str_replace('#', '/', $name);
+
+            foreach (['phtml', 'blade.php', 'twig', 'html.twig'] as $ext) {
+                if ($this->files->exists("{$path}.{$ext}")) {
+                    if ($ext == 'phtml') {
+                        \View::addExtension('phtml', 'php');
+                    }
+                    return "{$path}.{$ext}";
+                }
+            }
+        }
         if ($m = \TAO::regexp('{^table\s*~(.+)$}', $name)) {
             $name = app()->taoAdmin->tableView(trim($m[1]));
         } elseif ($m = \TAO::regexp('{^([a-z]+)\s*~(.+)$}', $name)) {

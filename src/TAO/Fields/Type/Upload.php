@@ -4,6 +4,7 @@ namespace TAO\Fields\Type;
 
 use Illuminate\Database\Schema\Blueprint;
 use TAO\Fields\Field;
+use TAO\Fields;
 
 /**
  * Class Upload
@@ -11,10 +12,7 @@ use TAO\Fields\Field;
  */
 class Upload extends Field
 {
-    /**
-     * @var bool
-     */
-    protected $tempId = false;
+    use Fields\FileField;
 
     /**
      * @param Blueprint $table
@@ -36,9 +34,6 @@ class Upload extends Field
         }
     }
 
-    /**
-     *
-     */
     public function delete()
     {
         $file = trim($this->value());
@@ -67,101 +62,6 @@ class Upload extends Field
             $this->item[$this->name] = $dest;
             $this->item->where($this->item->getKeyName(), $this->item->getKey())->update([$this->name => $dest]);
         }
-    }
-
-    /**
-     * @param $info
-     * @return string
-     */
-    public function destinationPath($info)
-    {
-        $dir = $this->param('private', false) ? $this->item->getPrivateHomeDir() : $this->item->getHomeDir();
-        $file = $this->destinationFilename($info);
-        return "{$dir}/{$file}";
-    }
-
-    /**
-     * @param $info
-     * @return mixed|null
-     */
-    public function destinationFilename($info)
-    {
-        $cb = $this->param('generate_file_name', false);
-        if (is_callable($cb)) {
-            return call_user_func($cb, $info);
-        }
-
-        $name = $this->param('file_name_template', '{datatype}-{field}-{id}.{ext}');
-        $ext = trim($info->ext);
-        if (empty($ext)) {
-            $name = str_replace('.{ext}', '', $name);
-            $name = str_replace('.{Ext}', '', $name);
-        }
-        $name = str_replace('{datatype}', $this->item->getDatatype(), $name);
-        $name = str_replace('{field}', $this->name, $name);
-        $name = str_replace('{id}', $this->item->getKey(), $name);
-        $name = str_replace('{filename}', $info->name, $name);
-        $name = str_replace('{ext}', strtolower($info->ext), $name);
-        $name = str_replace('{Ext}', $info->ext, $name);
-
-        return $name;
-    }
-
-    /**
-     * @return bool|string
-     */
-    public function getTempId()
-    {
-        if (!$this->tempId) {
-            $this->tempId = time() . '_' . rand(11111111, 99999999) . '_' . $this->item->getDatatype() . '_' . $this->name;
-        }
-        return $this->tempId;
-    }
-
-    /**
-     * @param $tid
-     * @return string
-     */
-    public function tempDir($tid)
-    {
-        $sid = \Session::getId();
-        return "session-files/{$sid}/{$tid}";
-    }
-
-    /**
-     * @param $file
-     * @param $info
-     * @return bool|mixed
-     */
-    public function checkUploadedFile($file, &$info)
-    {
-        $cb = $this->param('check_uploaded_file', false);
-        if (is_callable($cb)) {
-            return call_user_func($cb, $file);
-        }
-        return true;
-    }
-
-    /**
-     * @param $size
-     * @return string
-     */
-    public function generateHumanSize($size)
-    {
-        if ($size >= 10485760) {
-            return ((int)round($size / 1048576)) . 'M';
-        }
-        if ($size >= 1048576) {
-            return number_format($size / 1048576, 1) . 'M';
-        }
-        if ($size >= 10240) {
-            return ((int)round($size / 1024)) . 'K';
-        }
-        if ($size >= 1024) {
-            return number_format($size / 1024, 1) . 'K';
-        }
-
-        return $size . 'B';
     }
 
     /**
@@ -201,14 +101,6 @@ class Upload extends Field
     }
 
     /**
-     * @return string
-     */
-    public function uploadUrl()
-    {
-        return $this->apiUrl('upload', ['_token' => csrf_token(), 'upload_id' => $this->getTempId()]);
-    }
-
-    /**
      * @return int
      */
     public function size()
@@ -227,6 +119,12 @@ class Upload extends Field
     {
         return $this->generateHumanSize($this->size());
     }
+
+    protected function defaultFileNameTemplate()
+    {
+        return '{datatype}-{field}-{id}.{ext}';
+    }
+
 
     /**
      * @return bool

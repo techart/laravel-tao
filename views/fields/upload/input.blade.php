@@ -1,5 +1,5 @@
 <div class="tao-fields-upload">
-    <input type="hidden" name="{{ $field->name }}" value="{{ $field->getTempId() }}" id="tao_upload_hidden_{{ $field->name }}">
+    <input type="hidden" name="{{ $field->name }}" value="{{ $field->tempId() }}" id="tao_upload_hidden_{{ $field->name }}">
     <span id="tao_upload_informer_{{ $field->name}}">
         @if ($field->url())
             @if (isset($image))
@@ -11,12 +11,16 @@
             @endif
         @endif
     </span>
-    <a href="javascript:void();" id="tao_upload_button_{{ $field->name}}">
-        @if ($field->url())
-            Заменить
-        @else
-            Загрузить
-        @endif
-    </a>
+    <br>
+    <div class="tao-fields-upload__btn">
+        <div class="btn btn-info tao-fields-upload__btn-text" id="tao_upload_button_{{ $field->name}}">
+            @if ($field->url())
+                Заменить
+            @else
+                Загрузить
+            @endif
+        </div>
+        <input class="tao-fields-upload__file-input" type="file" name="{{ $field->name }}-file">
+    </div>
     @include('fields ~ upload._ajax-upload-script')
 </div>

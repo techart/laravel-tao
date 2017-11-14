@@ -5,7 +5,7 @@
     @endif
     
     @if ($with_filter)
-        <a href="" class="btn btn-inverse"><i class="icon-search icon-white"></i> Поиск</a>
+        <a href="" class="btn btn-inverse tao-filter-button {{ $filter_empty? '' : 'filter-active'}}"><i class="icon-search icon-white"></i> {{ $filter_empty? 'Поиск' : 'Скрыть поиск'}}</a>
     @endif
     
 @endsection

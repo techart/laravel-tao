@@ -2,8 +2,15 @@
 
 namespace TAO\Text;
 
-
+/**
+ * Interface ProcessorInterface
+ * @package TAO\Text
+ */
 interface ProcessorInterface
 {
-	public function process($text);
+    /**
+     * @param string $text
+     * @return string
+     */
+    public function process($text);
 }

@@ -66,7 +66,7 @@ return [
 
             // If set to true, auto-escaping will be enabled by default for all templates.
             // default: 'html'
-            'autoescape' => 'html',
+            'autoescape' => false,
 
             // A flag that indicates which optimizations to apply
             // (default to -1 -- all optimizations are enabled; set it to 0 to disable)

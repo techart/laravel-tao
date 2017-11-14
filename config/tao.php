@@ -18,13 +18,16 @@
         'select' => \TAO\Fields\Type\Select::class,
         'upload' => \TAO\Fields\Type\Upload::class,
         'image' => \TAO\Fields\Type\Image::class,
+        'attaches' => \TAO\Fields\Type\Attaches::class,
     ],
 
-	'text' => [
-		'processors' => [
-			'markdown' => \TAO\Text\Processor\Parser\Markdown::class
-		]
-	],
+    'text' => [
+        'processors' => [
+            'markdown' => \TAO\Text\Processor\Parser\Markdown::class,
+            'translit' => \TAO\Text\Processor\Translit::class,
+            'translit_for_url' => \TAO\Text\Processor\TranslitForUrl::class,
+        ]
+    ],
     
     'datatypes' => [
         'users' => \TAO\Fields\Model\User::class,

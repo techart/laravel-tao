@@ -2,6 +2,8 @@
 
 namespace TAO;
 
+use Techart\Frontend\PathResolver;
+
 class TAO
 {
     /**
@@ -26,7 +28,6 @@ class TAO
     protected $datatypes = null;
     protected $controller;
     protected $inAdmin = false;
-
 
     public function useLayout($name)
     {
@@ -129,7 +130,7 @@ class TAO
             $controller = '\\' . (\TAO::datatype('users')->loginController());
             $urlLogin = \TAO::datatype('users')->loginUrl();
             \Route::get($urlLogin, "{$controller}@showLoginForm");
-            \Route::post($urlLogin, "{$controller}@login");
+            \Route::post($urlLogin, array('as' => 'login', 'uses' => "{$controller}@login"));
             \Route::get('/users/logout/', "{$controller}@logout");
 
         }
@@ -397,5 +398,10 @@ class TAO
             }
             return false;
         }
+    }
+
+    public function frontend($path = false, $options = [])
+    {
+        return Frontend\Manager::instanse($path, $options);
     }
 }

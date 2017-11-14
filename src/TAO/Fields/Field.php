@@ -139,13 +139,20 @@ abstract class Field
         $this->item[$this->name] = $value;
     }
 
-    /**
-     * @param $request
-     */
     public function setFromRequest($request)
     {
+        if (is_array($request)) {
+            if (isset($request[$this->name])) {
+                $this->item[$this->name] = $request[$this->name];
+            } else {
+                $this->item[$this->name] = $this->nullValue();
+            }
+            return;
+        }
         if ($request->has($this->name)) {
-            $this->item[$this->name] = is_null($request->input($this->name)) ? '' : $request->input($this->name);
+            $this->item[$this->name] = is_null($request->input($this->name)) ? $this->nullValue() : $request->input($this->name);
+        } else {
+            $this->item[$this->name] = $this->nullValue();
         }
     }
 
@@ -160,6 +167,14 @@ abstract class Field
      * @return string
      */
     public function defaultValue()
+    {
+        return '';
+    }
+
+    /**
+     * @return string
+     */
+    public function nullValue()
     {
         return '';
     }

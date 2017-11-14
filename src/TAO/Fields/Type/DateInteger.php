@@ -81,6 +81,12 @@ class DateInteger extends Field
 
     public function setFromRequest($request)
     {
+        if (is_array($request)) {
+            if (isset($request[$this->name])) {
+                $this->set($request[$this->name]);
+            }
+            return;
+        }
         if ($request->has($this->name)) {
             $this->set($request->input($this->name));
         }

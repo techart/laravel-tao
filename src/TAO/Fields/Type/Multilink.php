@@ -25,6 +25,11 @@ class Multilink extends Field
         return $this->attachedIds;
     }
 
+    public function value()
+    {
+        return $this->attachedIds();
+    }
+
     public function isAttached($id)
     {
         if (empty($this->item->getKey())) {
@@ -36,7 +41,14 @@ class Multilink extends Field
 
     public function items()
     {
-        return $this->relatedModel()->itemsForSelect();
+        $items = $this->param('items');
+        if (!empty($items)) {
+            $items = \TAO::itemsForSelect($items);
+            return $items;
+        }
+        $model = $this->relatedModel();
+        $items = $model->itemsForSelect([]);
+        return $items;
     }
 
     public function checkSchema(Blueprint $table)
@@ -61,18 +73,26 @@ class Multilink extends Field
 
     public function setFromRequest($request)
     {
-    }
-
-    public function setFromRequestAfterSave($request)
-    {
-        if ($request->has($this->name)) {
-            $values = $request->get($this->name);
+        if (is_array($request) && isset($request[$this->name]) && is_array($request[$this->name])) {
+            $values = $request[$this->name];
             foreach ($this->items() as $id => $title) {
                 if (isset($values[$id]) && $values[$id]) {
                     $this->belongsToMany()->attach($id);
                 } else {
                     $this->belongsToMany()->detach($id);
                 }
+            }
+        }
+    }
+
+    public function setFromRequestAfterSave($request)
+    {
+        $values = $request->has($this->name)? $request->get($this->name) : [];
+        foreach ($this->items() as $id => $title) {
+            if (isset($values[$id]) && $values[$id]) {
+                $this->belongsToMany()->attach($id);
+            } else {
+                $this->belongsToMany()->detach($id);
             }
         }
     }
@@ -106,6 +126,9 @@ class Multilink extends Field
         $model = $this->param('model');
         if (!$model) {
             $datatype = $this->param('datatype');
+            if (!$datatype) {
+                return \TAO\Fields\Dummy\Model::class;
+            }
             $model = \TAO::datatypeClass($datatype);
         }
         return $model;
@@ -113,6 +136,12 @@ class Multilink extends Field
 
     public function relatedModel()
     {
-        return app()->make($this->relatedModelClass());
+        $class = $this->relatedModelClass();
+        if ($class == \TAO\Fields\Dummy\Model::class) {
+            $model = new \TAO\Fields\Dummy\Model;
+            $model->code = $this->name;
+            return $model;
+        }
+        return app()->make($class);
     }
 }

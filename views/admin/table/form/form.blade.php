@@ -1,4 +1,4 @@
-<form action="" method="post">
+<form id="admin-form" action="" method="post" enctype="multipart/form-data">
     {{ csrf_field() }}
     
     @if($tabs)

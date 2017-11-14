@@ -25,6 +25,47 @@ trait Table
      */
     protected $canCopy = false;
 
+    protected $filterFields = [];
+    protected $filterValues = [];
+
+
+    protected function filterFields()
+    {
+        $filter = $this->datatype()->filter();
+        if (empty($filter) && !is_array($filter)) {
+            return [];
+        }
+        $out = [];
+        $this->filterValues = [];
+        $model = new \TAO\Fields\Dummy\Model();
+        $model['id'] = 1;
+        $request = \Request::getFacadeRoot();
+        $inputData = $request->has('filter')? $request->get('filter') : [];
+        foreach ($filter as $field => $data) {
+            $out[$field] = app()->taoFields->create($field, $data, $model);
+            $out[$field]->setupDefault();
+            $out[$field]->setFromRequest($inputData);
+            $this->filterValues[$field] = $out[$field]->value();
+        }
+        $this->filterFields = $out;
+        return $out;
+    }
+
+    public function filterAction()
+    {
+        $request = \Request::getFacadeRoot();
+        if ($request->method() == 'POST') {
+            $fields = $this->filterFields();
+            $this->filter = [];
+            foreach ($fields as $name => $field) {
+                if ($request->has($name)) {
+                    $this->filter[$name] = $request->get($name);
+                }
+            }
+        }
+        return redirect($this->actionUrl('list'));
+    }
+
     /**
      * @return mixed
      */
@@ -35,6 +76,8 @@ trait Table
         if ($this->datatype()->isTree) {
             return $this->treeAction();
         }
+
+        $filter = $this->filterFields();
 
         $count = $this->countRows();
         $numPages = ceil($count / $this->perPage());
@@ -52,7 +95,13 @@ trait Table
             'can_delete' => $this->canDelete,
             'can_copy' => $this->canCopy,
             'add_text' => $this->datatype()->adminAddButtonText(),
-            'with_filter' => false,
+            'filter' => $filter,
+            'with_filter' => !empty($filter),
+            'filter_url' => $this->actionUrl('filter', ['__no_filter' => true, '__no_page' => true]),
+            'reset_filter_url' => $this->actionUrl('list', ['__no_filter' => true, '__no_page' => true]),
+            'sidebar_visible' => !empty($this->filter),
+            'filter_empty' => empty($this->filter),
+            //'sidebar_visible' => true,
             'with_row_actions' => ($this->canEdit || $this->canDelete || $this->canCopy),
             'pager_callback' => array($this, 'pageUrl'),
             'page' => $this->page,

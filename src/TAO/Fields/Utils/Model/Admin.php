@@ -191,4 +191,9 @@ trait Admin
     {
         return $this->titleForAdminList();
     }
+
+    public function filter()
+    {
+        return false;
+    }
 }

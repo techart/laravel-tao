@@ -6,7 +6,7 @@ class Image extends Upload
 {
     public function adminPreviewUrl()
     {
-        return $this->apiUrl('preview', ['_token' => csrf_token(), 'upload_id' => $this->getTempId()]) . '&r=' . time() . rand(1111, 9999);
+        return $this->apiUrl('preview', ['_token' => csrf_token(), 'upload_id' => $this->tempId()]) . '&r=' . time() . rand(1111, 9999);
     }
 
     public function apiActionPreview()

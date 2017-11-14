@@ -57,14 +57,15 @@ class TableController extends AdminController
         return $this->page;
     }
 
-    protected function filteredDatatype()
+    protected function filtered()
     {
-        return $this->datatype()->applyFilter($this->filter);
+        $builder = $this->datatype()->ordered();
+        return $this->datatype()->applyFilter($builder, $this->filterValues);
     }
 
     protected function countRows()
     {
-        return $this->filteredDatatype()->count();
+        return $this->filtered()->count();
     }
 
     protected function canAdd()
@@ -74,8 +75,7 @@ class TableController extends AdminController
 
     protected function selectRows()
     {
-        return $this->filteredDatatype()
-            ->ordered()
+        return $this->filtered()
             ->limit($this->perPage())
             ->offset(($this->currentPage()-1)*$this->perPage())
             ->get();

@@ -34,6 +34,7 @@ class Collection
     public static function numericKeysOnly($in)
     {
         $out = [];
+        $in = (array)$in;
         foreach ($in as $key => $value) {
             if (is_numeric($key)) {
                 $out[$key] = $value;

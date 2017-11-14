@@ -4,8 +4,8 @@ namespace TAO;
 
 class Request extends \Illuminate\Http\Request
 {
-    public function test()
+    public function url()
     {
-        return 'aaa';
+        return preg_replace('/\?.*/', '', $this->getUri());
     }
 }

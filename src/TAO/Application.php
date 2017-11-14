@@ -2,8 +2,6 @@
 
 namespace TAO;
 
-use Illuminate\Http\Request;
-
 /**
  * Class Application
  * @package TAO
