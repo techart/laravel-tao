@@ -1,6 +1,7 @@
 <?php
 
 namespace TAO\Fields\Model;
+
 use TAO\Fields\Model as AbstractModel;
 
 use Illuminate\Auth\Authenticatable;
@@ -29,7 +30,6 @@ abstract class AbstractUser extends AbstractModel implements
             ),
             'is_admin' => array(
                 'type' => 'checkbox',
-                //'label' => false,
                 'label' => 'Супер-администратор',
                 'in_list' => false,
                 'in_form' => true,
@@ -37,7 +37,6 @@ abstract class AbstractUser extends AbstractModel implements
             ),
             'is_secondary_admin' => array(
                 'type' => 'checkbox',
-                //'label' => false,
                 'label' => 'Администратор',
                 'in_list' => false,
                 'in_form' => true,
@@ -45,7 +44,6 @@ abstract class AbstractUser extends AbstractModel implements
             ),
             'access_realm_admin' => array(
                 'type' => 'checkbox',
-                //'label' => false,
                 'label' => 'Редактор',
                 'in_list' => false,
                 'in_form' => true,
@@ -88,6 +86,63 @@ abstract class AbstractUser extends AbstractModel implements
         return $fields;
     }
 
+    public function filter()
+    {
+        return array(
+            'search' => array(
+                'type' => 'string',
+                'label' => 'По имени/адресу',
+            ),
+        );
+    }
+
+    public function applyFilterSearch($builder, $value)
+    {
+        $value = "%{$value}%";
+        return $builder->where(\DB::raw('CONCAT_WS(" ", name, email)'), 'like', $value);
+    }
+
+    public function accessEdit($user = false)
+    {
+        if (!$user) {
+            $user = \Auth::user();
+        }
+        // Только супер-админы могут админить юзеров
+        return $user['is_admin'];
+    }
+
+    /**
+     *
+     * Настройка нового пользователя, добавленного механизмом внешней авторизации. До записи.
+     * По умолчанию считается, что по внешей авторизации приходять только супер-админы.
+     * Переопределите класс пользователя, чтобы это изменить
+     *
+     * @param array $data
+     */
+    public function setupAfterExtraAuth($data = [])
+    {
+        $this->field('is_admin')->set(1);
+    }
+
+    /**
+     *
+     * Настройка нового пользователя, добавленного механизмом внешней авторизации. После записи записи.
+     *
+     * @param array $data
+     */
+    public function setupAfterExtraAuth2($data = [])
+    {
+    }
+
+    /**
+     *
+     * Имеет ли данный пользователь право на вход в указанный реалм.
+     * Админы могут войти в любой реалм.
+     * По умолчанию есть только один админский реалм. Если нужны другие, то добавьте access_realm_<name> поле в переопределенном классе
+     *
+     * @param $name
+     * @return bool|int
+     */
     public function accessToRealm($name)
     {
         if ($this['is_admin'] || $this['is_secondary_admin']) {
@@ -95,6 +150,31 @@ abstract class AbstractUser extends AbstractModel implements
         }
         return (int)$this["access_realm_{$name}"];
     }
+
+    public function checkAccessGroup($group)
+    {
+        $group = trim($group);
+        if (!empty($group)) {
+            if (\TAO::datatype('roles')->findByCode($group)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function checkAccess($groups)
+    {
+        if ($this['is_admin'] || $this['is_secondary_admin']) {
+            return true;
+        }
+        foreach (explode(',', $groups) as $group) {
+            if ($this->checkAccessGroup($group)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     public function adminFormGroups()
     {

@@ -6,6 +6,7 @@ $nav = array(
         'title' => 'Главная',
     ),
     array(
+        'access' => 'root',
         'url' => '/admin/vars/',
         'title' => 'Сайт',
         'sub' => array(

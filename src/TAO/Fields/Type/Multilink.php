@@ -2,12 +2,15 @@
 
 namespace TAO\Fields\Type;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Schema\Blueprint;
 use TAO\Fields\Field;
+use TAO\Fields\Model;
 
 class Multilink extends Field
 {
     protected $attachedIds;
+    protected $relatedItems;
 
     public function belongsToMany()
     {
@@ -134,6 +137,9 @@ class Multilink extends Field
         return $model;
     }
 
+    /**
+     * @return Model
+     */
     public function relatedModel()
     {
         $class = $this->relatedModelClass();
@@ -143,5 +149,18 @@ class Multilink extends Field
             return $model;
         }
         return app()->make($class);
+    }
+
+    /**
+     * Возвращает коллекцию связанных объектов
+     *
+     * @return Collection
+     */
+    public function relatedItems()
+    {
+        if (is_null($this->relatedItems)) {
+            $this->relatedItems = $this->relatedModel()->whereIn('id', $this->attachedIds())->get();
+        }
+        return $this->relatedItems;
     }
 }

@@ -9,7 +9,27 @@ namespace TAO\Fields\Utils\Model;
 trait Access
 {
 
+    protected $groupAdmin = false;
+    protected $groupAdminEdit = false;
+
     /**
+     *
+     * Возвращает символьный код группы доступа к админке этого дататайпа
+     *
+     * @return bool|string
+     */
+    public function groupForAdmin()
+    {
+        if ($this->groupAdmin) {
+            return $this->groupAdmin;
+        }
+        return 'admin_'.$this->getDatatype();
+    }
+
+    /**
+     *
+     * Может ли текущий или переданный юзер админить данный дататайп (входить в его админку)
+     *
      * @param $user
      * @return mixed
      */
@@ -18,10 +38,21 @@ trait Access
         if (!$user) {
             $user = \Auth::user();
         }
-        return $user['is_admin'];
+        if ($user['is_admin']||$user['is_secondary_admin']) {
+            return true;
+        }
+
+        $group = $this->groupForAdmin();
+        if ($group) {
+            return $user->checkAccess($group);
+        }
+        return false;
     }
 
     /**
+     *
+     * Может ли текущий или переданный юзер редактировать данную конкретную запись
+     *
      * @param $user
      * @return mixed
      */
@@ -30,10 +61,19 @@ trait Access
         if (!$user) {
             $user = \Auth::user();
         }
-        return $this->accessAdmin($user);
+        if (!$this->accessAdmin($user)) {
+            return false;
+        }
+        if ($this->groupAdminEdit) {
+            return $user->checkAccess($this->groupEdit);
+        }
+        return true;
     }
 
     /**
+     *
+     * Может ли текущий или переданный юзер удалять данную конкретную запись
+     *
      * @param $user
      * @return mixed
      */
@@ -46,6 +86,9 @@ trait Access
     }
 
     /**
+     *
+     * Может ли текущий или переданный юзер добавлять записи в этом дататайпе
+     *
      * @param $user
      * @return mixed
      */

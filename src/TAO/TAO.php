@@ -253,7 +253,7 @@ class TAO
 
     public function publicPath()
     {
-        return rtrim(base_path('www'), '/');
+        return app()->make('path.public');
     }
 
     /**

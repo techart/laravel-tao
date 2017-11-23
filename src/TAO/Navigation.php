@@ -50,6 +50,10 @@ class Navigation
      * @var null
      */
     protected $match = null;
+    /**
+     * @var null
+     */
+    protected $access = null;
 
     /**
      * @var string
@@ -128,6 +132,11 @@ class Navigation
                     unset($data['selected']);
                 }
 
+                if (isset($data['access'])) {
+                    $this->access = $data['access'];
+                    unset($data['access']);
+                }
+
                 unset($data['id']);
                 unset($data['url']);
                 unset($data['title']);
@@ -164,6 +173,18 @@ class Navigation
                 $link->filter();
             }
         }
+    }
+
+    public function checkAccess()
+    {
+        if (!$this->access) {
+            return true;
+        }
+        $user = \Auth::user();
+        if (!$user) {
+            return false;
+        }
+        return $user->checkAccess($this->access);
     }
 
     /**
@@ -313,6 +334,24 @@ class Navigation
             return 0;
         }
         return count($this->sub);
+    }
+
+    public function hasChilds()
+    {
+        return $this->count()>0;
+    }
+
+    public function hasGrantedChilds()
+    {
+        if (!$this->hasChilds()) {
+            return false;
+        }
+        foreach($this->links() as $link) {
+            if ($link->checkAccess()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

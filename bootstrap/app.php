@@ -23,5 +23,9 @@ $app->singleton(
     TAO\App\Exceptions\Handler::class
 );
 
+$app->singleton('path.public', function() {
+    $publicPath = config('app.public_path');
+    return $publicPath ?: rtrim(base_path('www'), '/');
+});
 
 return $app;

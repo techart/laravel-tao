@@ -22,6 +22,17 @@ class TableController extends AdminController
         return $this->datatype;
     }
 
+    protected function accessAction($method, $parameters)
+    {
+        $acc = parent::accessAction($method, $parameters);
+        if ($acc === true) {
+            if (!$this->datatype()->accessAdmin()) {
+                return false;
+            }
+        }
+        return $acc;
+    }
+
     protected function initViews()
     {
         $path = $this->datatype()->adminViewsPath();

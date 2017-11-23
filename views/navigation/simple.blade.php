@@ -1,3 +1,5 @@
 @foreach($links as $link)
-    @include('navigation ~ link')
+    @if($link->checkAccess())
+        @include('navigation ~ link')
+    @endif
 @endforeach

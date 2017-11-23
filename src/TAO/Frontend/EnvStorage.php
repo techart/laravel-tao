@@ -2,14 +2,13 @@
 
 namespace TAO\Frontend;
 
-use Techart\Frontend\Environment;
 use Techart\Frontend\EnvironmentStorageInterface;
 
 class EnvStorage implements EnvironmentStorageInterface
 {
     public function getFromConfig($name)
     {
-        $env = config('app.frontend_env', false);
+        $env = env('FRONTEND_ENV', false);
         if ($env) {
             return $env;
         }

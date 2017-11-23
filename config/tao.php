@@ -15,6 +15,7 @@
         'checkbox' => \TAO\Fields\Type\Checkbox::class,
         'password' => \TAO\Fields\Type\Password::class,
         'multilink' => \TAO\Fields\Type\Multilink::class,
+        'multilink_tags' => \TAO\Fields\Type\MultilinkTags::class,
         'select' => \TAO\Fields\Type\Select::class,
         'upload' => \TAO\Fields\Type\Upload::class,
         'image' => \TAO\Fields\Type\Image::class,

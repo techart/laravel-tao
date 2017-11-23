@@ -1,12 +1,11 @@
 <?php
 
 namespace TAO\Fields\Model;
+
 use TAO\Fields\Model as AbstractModel;
 
-class Role extends AbstractModel
+abstract class Tag extends AbstractModel
 {
-    protected $table = 'roles';
-
     public function fields()
     {
         return array(
@@ -30,52 +29,33 @@ class Role extends AbstractModel
                 'in_list' => false,
                 'in_form' => true,
             ),
-
         );
     }
 
-    public function accessEdit($user = false)
+    public function findTag($name)
     {
-        if (!$user) {
-            $user = \Auth::user();
-        }
-        return $user['is_admin'];
-    }
-
-    public function findByCode($code)
-    {
-        foreach($this->where('code', $code)->get() as $item) {
+        foreach ($this->where('title', $name)->get() as $item) {
             return $item;
         }
     }
 
+    public function ordered()
+    {
+        return $this->orderBy('title');
+    }
+
     public function title()
     {
-        return $this['title'];
+        return preg_replace('/\s+/', ' ', trim($this['title']));
     }
 
     public function adminMenuSection()
     {
-        return false;
+        return 'Словари';
     }
 
-    public function adminTitleList()
+    public function setTitle($value)
     {
-        return 'Роли';
-    }
-
-    public function adminTitleEdit()
-    {
-        return 'Редактирование роли';
-    }
-
-    public function adminTitleAdd()
-    {
-        return 'Создание новой роли';
-    }
-
-    public function adminAddButtonText()
-    {
-        return 'Создать';
+        $this['title'] = $value;
     }
 }
