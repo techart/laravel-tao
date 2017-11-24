@@ -6,6 +6,8 @@ use TAO\Fields\Model as AbstractModel;
 
 abstract class Tag extends AbstractModel
 {
+    public $adminMenuSection = 'Словари';
+
     public function fields()
     {
         return array(
@@ -47,11 +49,6 @@ abstract class Tag extends AbstractModel
     public function title()
     {
         return preg_replace('/\s+/', ' ', trim($this['title']));
-    }
-
-    public function adminMenuSection()
-    {
-        return 'Словари';
     }
 
     public function setTitle($value)
