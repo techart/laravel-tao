@@ -71,7 +71,7 @@ class TableController extends AdminController
     protected function filtered()
     {
         $builder = $this->datatype()->ordered();
-        return $this->datatype()->applyFilter($builder, $this->filterValues);
+        return $this->datatype()->applyFilter($builder, $this->filterValues());
     }
 
     protected function countRows()

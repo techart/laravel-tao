@@ -141,19 +141,21 @@ abstract class Field
 
     public function setFromRequest($request)
     {
-        if (is_array($request)) {
-            if (isset($request[$this->name])) {
-                $this->item[$this->name] = $request[$this->name];
-            } else {
-                $this->item[$this->name] = $this->nullValue();
-            }
-            return;
-        }
+        $value = null;
         if ($request->has($this->name)) {
-            $this->item[$this->name] = is_null($request->input($this->name)) ? $this->nullValue() : $request->input($this->name);
-        } else {
-            $this->item[$this->name] = $this->nullValue();
+            $value = $this->getValueFromRequest($request);
         }
+        $this->set(!is_null($value) ? $value : $this->nullValue());
+    }
+
+    public function setFromRequestData($requestData)
+    {
+        $this->set(isset($requestData[$this->name]) ? $requestData[$this->name] :  $this->nullValue());
+    }
+
+    protected function getValueFromRequest($request)
+    {
+        return $request->input($this->name);
     }
 
     /**
@@ -161,6 +163,16 @@ abstract class Field
      */
     public function setFromRequestAfterSave($request)
     {
+    }
+
+    /**
+     * @param Request $request
+     */
+    public function setFromFilter($request)
+    {
+        if ($request->has('filter')) {
+            $this->setFromRequestData($request->input('filter'));
+        }
     }
 
     /**
@@ -239,6 +251,41 @@ abstract class Field
             $value = call_user_func_array($this->data['prepare_value'], [$value, $this]);
         }
         return $value;
+    }
+
+    /**
+     * Метод возвращает true если у поля нет значения для отображения в шаблоне. Учитывает callback 'is_empty'
+     * в настройках поля(если он задан).
+     *
+     * @return bool
+     */
+    public function isEmpty()
+    {
+        if (isset($this->data['is_empty']) && Core_Types::is_callable($this->data['is_empty'])) {
+            return call_user_func_array($this->data['is_empty'], [$this, $this->item]);
+        }
+        return $this->checkEmpty();
+    }
+
+    /**
+     * Метод возвращает true если у поля есть значения для отображения в шаблоне.
+     *
+     * @return bool
+     */
+    public function checkEmpty()
+    {
+        return $this->value() == $this->nullValue();
+    }
+
+    /**
+     * Метод возвращает true если у поля нет значения для отображения в шаблоне. Учитывает callback 'is_empty'
+     * в настройках поля(если он задан).
+     *
+     * @return bool
+     */
+    public function isNotEmpty()
+    {
+        return !$this->isEmpty();
     }
 
     /**

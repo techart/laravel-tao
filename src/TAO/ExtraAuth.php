@@ -51,8 +51,9 @@ class ExtraAuth {
             if (!empty($url)) {
                 $curl = new \Curl\Curl();
                 $curl->setBasicAuthentication($login, $password);
+                $curl->setOpt(CURLOPT_FOLLOWLOCATION, true);
                 $curl->get($url);
-                if (!$curl->error) {
+                if (!$curl->error && $curl->http_status_code==200) {
                     return array(
                         'name' => $login,
                     );

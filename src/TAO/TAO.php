@@ -321,12 +321,17 @@ class TAO
 
     public function setMeta($name, $value)
     {
-        app()->taoAssets->setMeta($name, $value);
+        \Assets::setMeta($name, $value);
+    }
+
+    public function setMetas($metas)
+    {
+        \Assets::setMetas($metas);
     }
 
     public function meta()
     {
-        return app()->taoAssets->meta();
+        return \Assets::meta();
     }
 
     public function render($template, $context = array())

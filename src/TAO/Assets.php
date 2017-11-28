@@ -18,6 +18,13 @@ class Assets
         $this->meta[$name] = $value;
     }
 
+    public function setMetas($metas)
+    {
+        foreach ($metas as $metaName => $metaValue) {
+            $this->setMeta($metaName, $metaValue);
+        }
+    }
+
     public function renderMeta()
     {
         return view('tao::meta', array('meta' => $this->meta));

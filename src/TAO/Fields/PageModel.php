@@ -64,7 +64,7 @@ abstract class PageModel extends Model
                 'group' => 'common.meta',
             ),
         );
-        foreach($extra as $field => $data) {
+        foreach ($extra as $field => $data) {
             if (isset($fields[$field])) {
                 if ($fields[$field] === false) {
                     unset($fields[$field]);
@@ -91,23 +91,30 @@ abstract class PageModel extends Model
     public function url()
     {
         $url = trim($this->field('url')->value());
-        if ($url=='') {
+        if ($url == '') {
             return $this->itemUrl($this);
         }
         return $url;
     }
 
+    /**
+     * @param Model|string $item
+     * @return string
+     */
     public function itemUrl($item)
     {
-        $id = is_object($item)? $item->getKey() : $item;
-        $url =  '/'.$this->getDatatype()."/{$id}/";
+        $id = is_object($item) ? $item->getKey() : $item;
+        $url = '/' . $this->getDatatype() . "/{$id}/";
         return $url;
     }
 
     public function itemRoutes()
     {
         $url = $this->itemUrl('{id}');
-        \Route::any($url, function($id) {
+        \Route::any($url, function ($id) {
+            /**
+             * @var PageModel $item
+             */
             $item = $this->find($id);
             if ($item->isactive) {
                 $itemUrl = $item->url();
@@ -121,4 +128,77 @@ abstract class PageModel extends Model
         })->where('id', '^\d+$');
     }
 
+    protected function beforeRender($data, $view)
+    {
+        parent::beforeRender($data, $view);
+        if (isset($data['mode']) && $this->isPageMetasSettingRequired($data['mode'])) {
+            $this->setPageMetas();
+        }
+    }
+
+    /**
+     * Возвращает true, если в указанном режиме отображения модели нужно установить ее meta-теги
+     *
+     * @param $renderMode
+     * @return bool
+     */
+    protected function isPageMetasSettingRequired($renderMode)
+    {
+        return $renderMode == 'full';
+    }
+
+    /**
+     * Устанавливает меты модели на текущей страницы
+     */
+    public function setPageMetas()
+    {
+        \TAO::setMetas($this->getPageMetas());
+    }
+
+    /**
+     * Формирует список мет текущей модели. Игнорирует меты с пустым значением.
+     *
+     * @return array
+     */
+    public function getPageMetas()
+    {
+        return array_filter([
+            'title' => $this->getMetaTitle(),
+            'description' => $this->getMetaDescription(),
+            'keywords' => $this->getMetaKeywords()
+        ]);
+    }
+
+    public function getMetaTitle()
+    {
+        return $this->getMeta('title', $this->title());
+    }
+
+    public function getMetaDescription()
+    {
+        return $this->getMeta('description');
+    }
+
+    public function getMetaKeywords()
+    {
+        return $this->getMeta('keywords');
+    }
+
+    /**
+     * Возвращает значение меты $name модели. Ищет значение в поле meta_{metaname}, если значение отсутсвует, то
+     * возвращает $defaultValue.
+     *
+     * @param $name
+     * @param string $defaultValue
+     * @return string
+     */
+    public function getMeta($name, $defaultValue = '')
+    {
+        $meta = $defaultValue;
+        $field = $this->field('meta_' . $name);
+        if ($field->isNotEmpty()) {
+            $meta = $field->value();
+        }
+        return $meta;
+    }
 }

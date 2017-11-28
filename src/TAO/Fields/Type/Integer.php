@@ -20,6 +20,11 @@ class Integer extends Field
         return 0;
     }
 
+    public function nullValue()
+    {
+        return 0;
+    }
+
     public function styleForAdminInput()
     {
         $style = parent::styleForAdminInput();

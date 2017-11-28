@@ -28,13 +28,15 @@ class Manager extends \Techart\Frontend\Frontend
 
     public function useStyle($name, $params = [])
     {
-        return \Assets::useFile($this->cssUrl($name));
+        $scope = isset($params['scope']) ? $params['scope'] : false;
+        return \Assets::useFile($this->cssUrl($name), $scope);
 
     }
 
     public function useScript($name, $params = [])
     {
-        return \Assets::useBottomScript($this->jsUrl($name), $params);
+        $scope = isset($params['scope']) ? $params['scope'] : false;
+        return \Assets::useFile($this->jsUrl($name), $scope);
 
     }
 

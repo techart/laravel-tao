@@ -20,6 +20,16 @@ class BelongsToMany
     {
         return array_keys($this->values);
     }
+
+    public function sync($ids, $withDetaching = true)
+    {
+        if ($withDetaching) {
+            $this->values = [];
+        }
+        foreach ($ids as $id) {
+            $this->attach($id);
+        }
+    }
 }
 
 

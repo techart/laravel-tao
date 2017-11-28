@@ -157,4 +157,8 @@ class Attaches extends StringField
         ];
     }
 
+    public function nullValue()
+    {
+        return [];
+    }
 }

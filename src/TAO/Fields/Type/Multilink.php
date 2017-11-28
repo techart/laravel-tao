@@ -12,6 +12,72 @@ class Multilink extends Field
     protected $attachedIds;
     protected $relatedItems;
 
+    /**
+     * Метод устанавливает связи с переданными ключами, удаляя старые. Если необходимо добавить привязки,
+     * не удаляя старые, нужно использовать метод attach. Передавать можно как массив, так и единичный ключ.
+     *
+     * @param array|int $ids
+     */
+    public function set($ids)
+    {
+        $this->sync($this->normalizeValue($ids));
+    }
+
+    /**
+     * Добавляет привязки к переданным ключам, не удаляя старые. Передавать можно как массив, так и единичный ключ.
+     *
+     * @param array|int $ids
+     */
+    public function attach($ids)
+    {
+        $attachedIds = $this->attachedIds();
+        $ids = $this->normalizeValue($ids);
+        foreach ($ids as $id) {
+            if (!$this->isAttached($id)) {
+                $attachedIds[] = $id;
+            }
+        }
+        $this->sync($attachedIds);
+        $this->resetAttachedIds();
+    }
+
+    /**
+     * Удаляет привязки к переданным ключам. Передавать можно как массив, так и единичный ключ.
+     *
+     * @param array|int $ids
+     */
+    public function detach($ids)
+    {
+        $ids = $this->normalizeValue($ids);
+        $this->belongsToMany()->detach($ids);
+        $this->resetAttachedIds();
+    }
+
+    /**
+     * Устанавливает привязки к переданным ключам. При значении $withDetaching=true удаялет старые привязки.
+     * Передавать можно как массив, так и единичный ключ.
+     *
+     * @param $ids
+     * @param bool $withDetaching
+     */
+    public function sync($ids, $withDetaching = true)
+    {
+        $ids = $this->normalizeValue($ids);
+        $this->belongsToMany()->sync($ids, $withDetaching);
+        $this->resetAttachedIds();
+    }
+
+    protected function normalizeValue($value)
+    {
+        if (is_null($value)) {
+            $value = [];
+        }
+        if (is_array($value) && !\TAO\Type\Collection::isIndexed($value)) {
+            $value = array_keys($value);
+        }
+        return array_wrap($value);
+    }
+
     public function belongsToMany()
     {
         return $this->item->belongsToMany($this->relatedModelClass(), $this->tableRelations(), $this->thisKey(), $this->relatedKey());
@@ -26,6 +92,11 @@ class Multilink extends Field
             }
         }
         return $this->attachedIds;
+    }
+
+    protected function resetAttachedIds()
+    {
+        $this->attachedIds = null;
     }
 
     public function value()
@@ -73,31 +144,13 @@ class Multilink extends Field
     {
     }
 
-
     public function setFromRequest($request)
     {
-        if (is_array($request) && isset($request[$this->name]) && is_array($request[$this->name])) {
-            $values = $request[$this->name];
-            foreach ($this->items() as $id => $title) {
-                if (isset($values[$id]) && $values[$id]) {
-                    $this->belongsToMany()->attach($id);
-                } else {
-                    $this->belongsToMany()->detach($id);
-                }
-            }
-        }
     }
 
     public function setFromRequestAfterSave($request)
     {
-        $values = $request->has($this->name)? $request->get($this->name) : [];
-        foreach ($this->items() as $id => $title) {
-            if (isset($values[$id]) && $values[$id]) {
-                $this->belongsToMany()->attach($id);
-            } else {
-                $this->belongsToMany()->detach($id);
-            }
-        }
+        $this->set($this->getValueFromRequest($request));
     }
 
     public function tableRelations()
@@ -162,5 +215,10 @@ class Multilink extends Field
             $this->relatedItems = $this->relatedModel()->whereIn('id', $this->attachedIds())->get();
         }
         return $this->relatedItems;
+    }
+
+    public function nullValue()
+    {
+        return [];
     }
 }

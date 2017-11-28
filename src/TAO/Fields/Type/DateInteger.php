@@ -17,6 +17,11 @@ class DateInteger extends Field
         return 0;
     }
 
+    public function nullValue()
+    {
+        return 0;
+    }
+
     public function withTime()
     {
         return $this->param('with_time', false);
@@ -77,18 +82,5 @@ class DateInteger extends Field
             $value = mktime($m[4], $m[5], $m[6], $m[2], $m[1], $m[3]);
         }
         $this->item[$this->name] = $value;
-    }
-
-    public function setFromRequest($request)
-    {
-        if (is_array($request)) {
-            if (isset($request[$this->name])) {
-                $this->set($request[$this->name]);
-            }
-            return;
-        }
-        if ($request->has($this->name)) {
-            $this->set($request->input($this->name));
-        }
     }
 }

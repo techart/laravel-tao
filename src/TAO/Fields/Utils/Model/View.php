@@ -78,6 +78,11 @@ trait View
         $data['mode'] = isset($data['mode']) ? $data['mode'] : 'teaser';
         $data['item'] = $this;
         $view = $this->findView($data['mode']);
+        $this->beforeRender($data, $view);
         return view($view, $data);
+    }
+
+    protected function beforeRender($data, $view)
+    {
     }
 }

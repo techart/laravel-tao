@@ -1,6 +1,8 @@
 <?php
 
 namespace TAO\Fields\Controllers;
+use TAO\Fields;
+use TAO\Request;
 
 /**
  * Trait Table
@@ -25,30 +27,109 @@ trait Table
      */
     protected $canCopy = false;
 
+    /**
+     * @var Fields\Field[]
+     */
     protected $filterFields = [];
-    protected $filterValues = [];
+
+    /**
+     * @var bool
+     */
+    protected $isFilterInitialized = false;
 
 
+    /**
+     * @return Fields\Field[]
+     */
     protected function filterFields()
     {
-        $filter = $this->datatype()->filter();
-        if (empty($filter) && !is_array($filter)) {
-            return [];
+        if (!$this->isFilterInitialized) {
+            $this->initializeFilter();
         }
-        $out = [];
-        $this->filterValues = [];
+        return $this->filterFields;
+    }
+
+    protected function filterValues()
+    {
+        if (!$this->isFilterInitialized) {
+            $this->initializeFilter();
+        }
+        return $this->collectFilterValues();
+    }
+
+    protected function initializeFilter()
+    {
+        $this->filterFields = $this->makeFilterFields();
+        $this->setFilterValuesFromRequest();
+        $this->isFilterInitialized = true;
+    }
+
+    protected function filterFieldsData()
+    {
+        $fieldsData = $this->datatype()->filter();
+        if (empty($fieldsData) && !is_array($fieldsData)) {
+            $fieldsData = [];
+        }
+        return $fieldsData;
+    }
+
+    protected function makeFilterDummyModel()
+    {
         $model = new \TAO\Fields\Dummy\Model();
         $model['id'] = 1;
-        $request = \Request::getFacadeRoot();
-        $inputData = $request->has('filter')? $request->get('filter') : [];
-        foreach ($filter as $field => $data) {
-            $out[$field] = app()->taoFields->create($field, $data, $model);
-            $out[$field]->setupDefault();
-            $out[$field]->setFromRequest($inputData);
-            $this->filterValues[$field] = $out[$field]->value();
+        return $model;
+    }
+
+    protected function makeFilterFields()
+    {
+        $filterFields = [];
+        $model = $this->makeFilterDummyModel();
+        $fieldsData = $this->filterFieldsData();
+        foreach ($fieldsData as $fieldName => $data) {
+            $filterFields[$fieldName] = $this->makeFilterField($fieldName, $data, $model, $filterFields);
         }
-        $this->filterFields = $out;
-        return $out;
+        return $filterFields;
+    }
+
+    /**
+     * @param Request $request
+     */
+    protected function setFilterValuesFromRequest($request = null)
+    {
+        if (!$request) {
+            $request = \Request::getFacadeRoot();
+        }
+        foreach ($this->filterFields as $field) {
+            $field->setFromFilter($request);
+        }
+    }
+
+    /**
+     * @param $fieldName
+     * @param $data
+     * @param $model
+     *
+     * @return Fields\Field
+     */
+    protected function makeFilterField($fieldName, $data, $model)
+    {
+        $field = app()->taoFields->create($fieldName, $data, $model);
+        $field->setupDefault();
+        return $field;
+    }
+
+    protected function collectFilterValues()
+    {
+        $values = [];
+        foreach ($this->filterFields() as $field) {
+            $values[$field->name] = $field->value();
+        }
+        return $values;
+    }
+
+    protected function requestHasFilter($request)
+    {
+        return $request->has('filter');
     }
 
     public function filterAction()
