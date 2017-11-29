@@ -47,6 +47,9 @@ trait Forms
                 foreach ($fields as $field) {
                     $field->setFromRequestAfterSave($request);
                 }
+                if ($request->has('_submit_and_stay')) {
+                    return redirect($this->actionUrl('edit'));
+                }
                 return redirect($this->actionUrl('list'));
             }
         }
@@ -58,6 +61,7 @@ trait Forms
             'fields' => $fields,
             'action_url' => $this->actionUrl('edit'),
             'submit_text' => $item->adminEditSubmitText(),
+            'submit_and_stay_text' => $item->adminEditSubmitAndStayText(),
             'errors' => $errors,
         )));
     }
@@ -87,8 +91,12 @@ trait Forms
             }
             if (count($errors) == 0) {
                 $item->save();
+                $this->id = $item->getKey();
                 foreach ($fields as $field) {
                     $field->setFromRequestAfterSave($request);
+                }
+                if ($request->has('_submit_and_stay')) {
+                    return redirect($this->actionUrl('edit'));
                 }
                 return redirect($this->actionUrl('list', array('page' => 1)));
             }
@@ -100,6 +108,7 @@ trait Forms
             'fields' => $fields,
             'action_url' => $this->actionUrl('add'),
             'submit_text' => $item->adminAddSubmitText(),
+            'submit_and_stay_text' => $item->adminAddSubmitAndStayText(),
             'errors' => $errors,
         )));
     }

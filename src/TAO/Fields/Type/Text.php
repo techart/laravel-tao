@@ -18,7 +18,7 @@ class Text extends StringField
     {
         $style = parent::styleForAdminInput();
         if (!$style) {
-            $style = 'width:90%;height:150px;';
+            $style = 'width:90%;height:300px;';
         }
         return $style;
     }

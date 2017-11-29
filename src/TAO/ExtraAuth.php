@@ -14,7 +14,7 @@ class ExtraAuth {
             $user = app()->make(\TAO\Fields\Model\User::class);
             $users = $user->where('email', $email)->take(1)->get();
             if (count($users) == 0) {
-                $user = app()->make(\TAO\Fields\Model\User::class);
+                $user = \TAO::datatype('users')->newInstance();
                 $user->field('name')->set($name);
                 $user->field('email')->set($email);
                 $user->field('password')->set(bcrypt('~'));

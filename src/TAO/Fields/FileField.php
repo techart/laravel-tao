@@ -113,6 +113,8 @@ trait FileField
         if (is_array($info)) {
             $info = (object)$info;
         }
+
+        $nameWithoutExt = str_replace(".{$info->ext}", '', $info->name);
         return [
             'ext' => !empty($info->ext) ? strtolower($info->ext) : '',
             'Ext' => !empty($info->ext) ? $info->ext : '',
@@ -120,7 +122,7 @@ trait FileField
             'field' => $this->name,
             'id' => $this->item->getKey(),
             'filename' => $info->name,
-            'translit' => \TAO\Text::process($info->name, 'translit_for_url'),
+            'translit' => \TAO\Text::process($nameWithoutExt, 'translit_for_url'),
         ];
     }
 

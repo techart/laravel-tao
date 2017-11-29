@@ -17,7 +17,7 @@ class Attaches extends StringField
 
     protected function defaultFileNameTemplate()
     {
-        return '{translit}';
+        return '{translit}.{ext}';
     }
 
     public function value()

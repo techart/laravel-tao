@@ -49,6 +49,9 @@ class VarsController extends AdminController
                 foreach ($fields as $field) {
                     $field->setFromRequestAfterSave($request);
                 }
+                if ($request->has('_submit_and_stay')) {
+                    return redirect($this->actionUrl('edit'));
+                }
                 return redirect($this->actionUrl('list'));
             }
         }
@@ -61,6 +64,7 @@ class VarsController extends AdminController
             'tabs' => false,
             'action_url' => $this->actionUrl('edit'),
             'submit_text' => 'Сохранить',
+            'submit_and_stay_text' => 'Сохранить и остаться',
             'errors' => $errors,
         ));
     }

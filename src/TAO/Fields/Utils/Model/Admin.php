@@ -161,9 +161,25 @@ trait Admin
     /**
      * @return string
      */
+    public function adminAddSubmitAndStayText()
+    {
+        return $this->adminAddButtonText() . ' и остаться';
+    }
+
+    /**
+     * @return string
+     */
     public function adminEditSubmitText()
     {
         return 'Изменить';
+    }
+
+    /**
+     * @return string
+     */
+    public function adminEditSubmitAndStayText()
+    {
+        return $this->adminEditSubmitText() . ' и остаться';
     }
 
     /**

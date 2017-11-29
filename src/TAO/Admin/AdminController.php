@@ -31,7 +31,7 @@ class AdminController extends \TAO\Controller
     {
         return '/admin/login';
     }
-
+    
     /**
      * @return $this
      */

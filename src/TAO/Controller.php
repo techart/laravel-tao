@@ -53,6 +53,19 @@ class Controller extends BaseController
     {
 
     }
+    
+    protected function renderAccessDenied()
+    {
+        return view('auth ~ denied');
+    }
+    
+    protected function accessDenied()
+    {
+        if (!\Auth::user()) {
+            return redirect($this->urlLogin());
+        }
+        return $this->renderAccessDenied();
+    }
 
     public function callAction($method, $parameters)
     {
@@ -63,7 +76,7 @@ class Controller extends BaseController
             return parent::callAction($method, $parameters);
         }
         if ($rc === false) {
-            return redirect($this->urlLogin());
+            return $this->accessDenied();
         }
         return $rc;
     }

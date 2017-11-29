@@ -155,8 +155,10 @@ abstract class AbstractUser extends AbstractModel implements
     {
         $group = trim($group);
         if (!empty($group)) {
-            if (\TAO::datatype('roles')->findByCode($group)) {
-                return true;
+            if ($role = \TAO::datatype('roles')->findByCode($group)) {
+                if ($this->field('roles')->isAttached($role->id)) {
+                    return true;
+                }
             }
         }
         return false;
