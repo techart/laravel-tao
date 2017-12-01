@@ -156,9 +156,14 @@ class Multilink extends Field
     public function tableRelations()
     {
         if (isset($this->data['table_relations'])) {
-            return $this->data['table_relations'];
+            $table = $this->data['table_relations'];
+        } else {
+            $table = $this->item->getTableName() . '_' . $this->relatedModel()->getTableName() . '_relations';
         }
-        return $this->item->getTable() . '_' . $this->relatedModel()->getTable() . '_relations';
+        if ($db = $this->item->getTableDatabase()) {
+            $table = "{$db}.{$table}";
+        }
+        return $table;
     }
 
     public function thisKey()

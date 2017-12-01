@@ -10,6 +10,33 @@ use Illuminate\Database\Schema\Blueprint;
  */
 trait Schema
 {
+    /**
+     * Возвращает только имя таблицы в случае если оно указано через точку после имени базы данных
+     *
+     * @return string
+     */
+    public function getTableName()
+    {
+        $name = $this->getTable();
+        if ($m = \TAO::regexp('{\.(.+)$}', $name)) {
+            $name = $m[1];
+        }
+        return $name;
+    }
+
+    /**
+     * Возвращает имя базы данных если оно указано в имени таблицы
+     *
+     * @return mixed
+     */
+    public function getTableDatabase()
+    {
+        $name = $this->getTable();
+        if ($m = \TAO::regexp('{^(.+)\.}', $name)) {
+            return $m[1];
+        }
+        return false;
+    }
 
     /**
      * @return $this
@@ -85,7 +112,7 @@ trait Schema
      */
     public function updateSchema()
     {
-        \Log::debug('Update schema for '. $this->getDatatype());
+        \Log::debug('Update schema for ' . $this->getDatatype());
         $tableName = $this->getTable();
         if (!$this->dbSchema()->hasTable($tableName)) {
             $this->dbSchema()->create($tableName, function (Blueprint $table) {
