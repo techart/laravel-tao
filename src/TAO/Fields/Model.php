@@ -2,16 +2,20 @@
 
 namespace TAO\Fields;
 
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Query\Builder;
+use Ramsey\Uuid\UuidInterface;
 use TAO\Fields;
 use Ramsey\Uuid\Uuid;
+use TAO\Selector;
 use TAO\Type\Collection;
 
 /**
  * Class Model
  * @package TAO\Fields
+ *
+ * @method orderBy(string $column, string $direction = 'asc')
+ * @method \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Collection|static[]|static|null find(mixed $id, array $columns)
+ * @method $this where(string|array|\Closure $column, string $operator = null, mixed $value = null, string $boolean = 'and')
  */
 abstract class Model extends \Illuminate\Database\Eloquent\Model
 {
@@ -78,7 +82,7 @@ abstract class Model extends \Illuminate\Database\Eloquent\Model
     public function __construct(array $attributes = [])
     {
         parent::__construct($attributes);
-        $this->connection = app()->tao->connectionNameFor($this->getTable());
+        $this->setConnection(app()->tao->connectionNameFor($this->getTable()));
         if ($this->idType == 'auto_increment') {
             $this->incrementing = true;
         }
@@ -171,7 +175,8 @@ abstract class Model extends \Illuminate\Database\Eloquent\Model
 
     /**
      * @param $name
-     * @return mixed
+     * @param bool $forceType
+     * @return Field
      * @throws Exception\UndefinedField
      */
     public function field($name, $forceType = false)
@@ -206,7 +211,7 @@ abstract class Model extends \Illuminate\Database\Eloquent\Model
     }
 
     /**
-     * @return Uuid
+     * @return UuidInterface
      */
     public function generateNewId()
     {
@@ -236,21 +241,12 @@ abstract class Model extends \Illuminate\Database\Eloquent\Model
         return $builder;
     }
 
+    /**
+     * @return Builder
+     */
     public function ordered()
     {
         return $this->orderBy($this->getKeyName());
-    }
-
-    /**
-     * @return array
-     */
-    public function allRows()
-    {
-        $out = [];
-        foreach ($this->ordered()->get() as $row) {
-            $out[$row->getKey()] = $row;
-        }
-        return $out;
     }
 
     /**
@@ -264,14 +260,14 @@ abstract class Model extends \Illuminate\Database\Eloquent\Model
             return $this->treeForSelect($args);
         }
         $out = Collection::numericKeysOnly($args);
-        foreach ($this->allRows() as $row) {
+        foreach ($this->get() as $row) {
             $out[$row->getKey()] = $row->title();
         }
         return $out;
     }
 
     /**
-     * @param bool $args
+     * @param array $args
      * @return array
      */
     public function treeForSelect($args = [])
@@ -285,9 +281,9 @@ abstract class Model extends \Illuminate\Database\Eloquent\Model
     }
 
     /**
-     * @param $tree
-     * @param $prefix
-     * @param $out
+     * @param Model[] $tree
+     * @param string $prefix
+     * @param array $out
      */
     protected function buildTreeForSelect(&$tree, $prefix, &$out)
     {
@@ -298,27 +294,51 @@ abstract class Model extends \Illuminate\Database\Eloquent\Model
     }
 
     /**
-     * @return array
+     * @param array $filter
+     * @return Model[]
      */
     public function buildTree($filter = [])
     {
-        $rows = $this->allRows();
-        $root = isset($filter['root'])? $filter['root'] : 0;
-        return $this->buildTreeBranch($root, $rows, (isset($filter['max_depth'])? $filter['max_depth'] : 10000));
+        $root = isset($filter['root']) ? $filter['root'] : 0;
+        $maxDepth = isset($filter['max_depth']) ? $filter['max_depth'] : 10000;
+        return $this->buildTreeFromRows($this->get()->getDictionary(), $root, $maxDepth);
     }
 
     /**
-     * @param $root
-     * @param $src
+     * @param Builder $query
+     * @param int $root
+     * @param int $maxDepth
      * @return array
      */
-    public function buildTreeBranch($root, &$src, $maxDepth = 10000)
+    public function buildTreeFromQuery($query, $root = 0, $maxDepth = 10000)
+    {
+        return $this->buildTreeFromRows($query->get(), $root, $maxDepth);
+    }
+
+    /**
+     * @param \Illuminate\Support\Collection|Model[] $rows
+     * @param int $root
+     * @param int $maxDepth
+     * @return array
+     */
+    public function buildTreeFromRows($rows, $root = 0, $maxDepth = 10000)
+    {
+        return $this->buildTreeBranch($rows, $root, $maxDepth);
+    }
+
+
+    /**
+     * @param \Illuminate\Support\Collection|Model[] $rows $rows
+     * @param int $root
+     * @param int $maxDepth
+     * @return Model[]
+     */
+    public function buildTreeBranch($rows, $root, $maxDepth = 10000)
     {
         $out = [];
         $first = true;
         $prev = false;
-        foreach ($src as $key => $row) {
-            $pid = $row[$this->parentKeyField];
+        foreach ($rows as $key => $row) {
             if ($row[$this->parentKeyField] == $root) {
                 if ($first) {
                     $row->isFirstBranch = true;
@@ -331,7 +351,7 @@ abstract class Model extends \Illuminate\Database\Eloquent\Model
                 }
 
                 if ($maxDepth>0) {
-                    $row->childs = $this->buildTreeBranch($key, $src, $maxDepth-1);
+                    $row->childs = $this->buildTreeBranch($rows, $key,$maxDepth-1);
                 }
                 $out[$key] = $row;
                 $prev = $row;
@@ -402,7 +422,7 @@ abstract class Model extends \Illuminate\Database\Eloquent\Model
 
     public function selector()
     {
-        $selector = app()->make(\TAO\Selector::class);
+        $selector = app()->make(Selector::class);
         $selector->mnemocode = $this->getDatatype();
         $selector->datatype = $this;
         $selector->title = $this->typeTitle();
@@ -432,6 +452,15 @@ abstract class Model extends \Illuminate\Database\Eloquent\Model
     public function validateForAdmin()
     {
         return $this->validate();
+    }
+    
+    public function __call($method, $args)
+    {
+        if ($m = \TAO::regexp('{^(.+)_belongs_to_many$}', $method)) {
+            $field = $m[1];
+            return $this->field($field)->belongsToMany();
+        }
+        return parent::__call($method, $args);
     }
 
 }

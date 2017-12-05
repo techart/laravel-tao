@@ -3,6 +3,7 @@
 namespace TAO\Fields\Utils\Model;
 
 use Illuminate\Contracts\View\Factory as ViewFactory;
+use Illuminate\Http\Response;
 
 trait View
 {
@@ -78,7 +79,17 @@ trait View
         $data['mode'] = isset($data['mode']) ? $data['mode'] : 'teaser';
         $data['item'] = $this;
         $view = $this->findView($data['mode']);
-        $this->beforeRender($data, $view);
+        foreach(array_keys($this->fields()) as $field) {
+            if ($p = $this->field($field)->param('in_context')) {
+                $data[is_string($p)? $p : $field] = $this->field($field);
+            }
+        }
+        $r = $this->beforeRender($data, $view);
+        if (is_array($r)) {
+            $data = \TAO::merge($data, $r);
+        } elseif (is_string($r) || $r instanceof Response) {
+            return $r;
+        }
         return view($view, $data);
     }
 

@@ -3,8 +3,20 @@
 namespace TAO;
 
 use Illuminate\Contracts\View\Factory as ViewFactory;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Response;
+use TAO\Fields\Model;
 
+/**
+ * Class Selector
+ * @package TAO
+ *
+ * @property string $mnemocode
+ * @property Model $datatype
+ * @property string $title
+ * @property array $args
+ * @property array $data
+ */
 class Selector
 {
     public $mnemocode = false;
@@ -13,6 +25,9 @@ class Selector
     public $args = [];
     public $data = [];
 
+    /**
+     * @return Builder
+     */
     public function query()
     {
         if (isset($this->data['query'])) {
@@ -25,6 +40,11 @@ class Selector
         }
     }
 
+    /**
+     * @param string $url
+     * @param array $data
+     * @return bool
+     */
     public function routeBase($url, $data = [])
     {
         $base = isset($data['base']) ? $data['base'] : '/' . $this->mnemocode . '/';
@@ -54,7 +74,7 @@ class Selector
                 if ($m = \TAO::regexp("{^/{$prefix}/(.+)$}", $url)) {
                     $url = '/' . $m[1];
                 } else {
-                    return;
+                    return false;
                 }
             }
             if (isset($base['postfix'])) {
@@ -62,7 +82,7 @@ class Selector
                 if ($m = \TAO::regexp("{^(.+)/{$postfix}/$}", $url)) {
                     $url = '/' . $m[1];
                 } else {
-                    return;
+                    return false;
                 }
             }
             $finder = isset($base['finder']) ? $base['finder'] : 'getItemByUrl';
@@ -77,6 +97,10 @@ class Selector
         }
     }
 
+    /**
+     * @param array $data
+     * @return $this
+     */
     public function route($data = [])
     {
         $this->data = $data;
@@ -84,7 +108,7 @@ class Selector
         $url = $urlSrc = $request->getPathInfo();
 
         $var = isset($this->data['pager_var']) ? $this->data['pager_var'] : 'page';
-        $base = isset($this->data['base']) ? $this->data['base'] : '/' . $this->mnemocode . '/';
+        $this->data['base'] = isset($this->data['base']) ? $this->data['base'] : '/' . $this->mnemocode . '/';
         $this->data['per_page'] = $perPage = isset($this->data['per_page']) ? $this->data['per_page'] : 10;
 
         $page = 1;
@@ -98,13 +122,18 @@ class Selector
 
         if ($this->routeBase($url, $this->data)) {
             $this->data['args'] = $this->args;
-            $this->data['pager_callback'] = function ($page) use ($url, $var) {
-                $url = $url;
-                if ($page > 1) {
-                    $url = rtrim($url, '/') . "/{$var}-{$page}/";
-                }
-                return $url;
-            };
+            if (!isset($this->data['pager_callback'])) {
+                $this->data['pager_callback'] = function ($page) use ($url, $var) {
+                    if ($page > 1) {
+                        $url = rtrim($url, '/') . "/{$var}-{$page}/";
+                    }
+                    $qs = app()->request()->getQueryString();
+                    if (!empty($qs)) {
+                        $url .= "?{$qs}";
+                    }
+                    return $url;
+                };
+            }
             $data = $this->data;
             \Route::any($urlSrc, function () use ($data) {
                 return $this->render($data);
@@ -113,6 +142,10 @@ class Selector
         return $this;
     }
 
+    /**
+     * @param $mode
+     * @return string
+     */
     public function findView($mode)
     {
         $factory = app(ViewFactory::class);
@@ -129,6 +162,10 @@ class Selector
         return 'tao::selector';
     }
 
+    /**
+     * @param string $mode
+     * @return string
+     */
     public function defaultTemplate($mode)
     {
         return $this->findView($mode);
@@ -139,6 +176,9 @@ class Selector
         \Assets::setMeta('title', $this->data['title']);
     }
 
+    /**
+     * @return string
+     */
     public function title()
     {
         $title = $this->title;

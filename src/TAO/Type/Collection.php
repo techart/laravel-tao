@@ -15,7 +15,8 @@ class Collection
     /**
      * Обертка для parse_str
      *
-     * @param string $in
+     * @param mixed $in
+     * @return mixed
      */
 	public static function parseString($in)
     {
@@ -29,7 +30,8 @@ class Collection
     /**
      * Фильтрует входной массив, оставляя только члены c цифровыми ключами
      *
-     * @param $in
+     * @param mixed $in
+     * @return array
      */
     public static function numericKeysOnly($in)
     {

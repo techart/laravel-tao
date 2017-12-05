@@ -10,7 +10,9 @@ class Assets
 
     public function init()
     {
-        $this->meta['title'] = config('tao.meta.title', config('app.name', $_SERVER['HTTP_HOST']));
+        if (isset($_SERVER, $_SERVER['HTTP_HOST'])) {
+            $this->meta['title'] = config('tao.meta.title', config('app.name', $_SERVER['HTTP_HOST']));
+        }
     }
 
     public function setMeta($name, $value)

@@ -2,7 +2,7 @@
 
 namespace TAO;
 
-use Techart\Frontend\PathResolver;
+use TAO\Facades\Assets;
 
 class TAO
 {
@@ -321,17 +321,17 @@ class TAO
 
     public function setMeta($name, $value)
     {
-        \Assets::setMeta($name, $value);
+        Assets::setMeta($name, $value);
     }
 
     public function setMetas($metas)
     {
-        \Assets::setMetas($metas);
+        Assets::setMetas($metas);
     }
 
     public function meta()
     {
-        return \Assets::meta();
+        return Assets::meta();
     }
 
     public function render($template, $context = array())

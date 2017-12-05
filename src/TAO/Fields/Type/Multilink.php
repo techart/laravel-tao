@@ -221,6 +221,40 @@ class Multilink extends Field
         }
         return $this->relatedItems;
     }
+    
+    public function attached()
+    {
+        return !empty($this->attachedIds());
+    }
+    
+    public function select($id)
+    {
+        $key = $this->relatedKey();
+        return $this->item->whereHas("{$this->name}_belongs_to_many", function($query) use($id, $key) {
+            if (is_array($id)) {
+                $query->whereIn($key, $id);
+            } else {
+                $query->where($key, $id);
+            }
+        });
+    }
+    
+    public function find($id)
+    {
+        return $this->relatedModel()->find($id);
+    }
+    
+    public function relatedLinks($class = false)
+    {
+        $cs = $class? " class=\"{$class}\"" : '';
+        $out = [];
+        foreach($this->relatedItems() as $item) {
+            $title = $item->title();
+            $url = $item->url();
+            $out[] = "<a href=\"{$url}\"{$cs}>{$title}</a>";
+        }
+        return $out;
+    }
 
     public function nullValue()
     {
