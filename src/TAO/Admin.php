@@ -57,7 +57,7 @@ class Admin
                 $menu[$section]['sub'][] = array(
                     'title' => $title,
                     'url' => $url,
-                    'access' => $datatype->groupForAdmin(),
+                    'access' => "datatype.$code::accessAdminMenuItem"
                 );
             }
         }

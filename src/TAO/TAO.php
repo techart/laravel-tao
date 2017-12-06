@@ -3,6 +3,7 @@
 namespace TAO;
 
 use TAO\Facades\Assets;
+use TAO\Fields\Model;
 
 class TAO
 {
@@ -71,8 +72,10 @@ class TAO
     public function route()
     {
         if (!$this->isCLI()) {
-            $request = \Request::getFacadeRoot();
-            $found = false;
+            /**
+             * @var Request $request
+             */
+            $request = app()->request();
             foreach (array_keys($this->routers()) as $name) {
                 $router = $this->router($name);
                 if (method_exists($router, 'route')) {
@@ -106,12 +109,6 @@ class TAO
                     }
                 }
             }
-
-            //if (!$found) {
-            //    app()->router->any(Request::getRequestUri(), function () {
-            //        return response(view('404'), 404);
-            //    });
-            //}
         }
     }
 
@@ -127,28 +124,17 @@ class TAO
     public function routes()
     {
         if (config('auth.public.login', false)) {
-            $controller = '\\' . (\TAO::datatype('users')->loginController());
-            $urlLogin = \TAO::datatype('users')->loginUrl();
+            /**
+             * @var Model\User $datatype
+             */
+            $datatype = \TAO::datatype('users');
+            $controller = '\\' . $datatype->loginController();
+            $urlLogin = $datatype->loginUrl();
             \Route::get($urlLogin, "{$controller}@showLoginForm");
             \Route::post($urlLogin, array('as' => 'login', 'uses' => "{$controller}@login"));
             \Route::get('/users/logout/', "{$controller}@logout");
 
         }
-        /*
-                $this->get('login', 'Auth\LoginController@showLoginForm')->name('login');
-                $this->post('login', 'Auth\LoginController@login');
-                $this->post('logout', 'Auth\LoginController@logout')->name('logout');
-
-                // Registration Routes...
-                $this->get('register', 'Auth\RegisterController@showRegistrationForm')->name('register');
-                $this->post('register', 'Auth\RegisterController@register');
-
-                // Password Reset Routes...
-                $this->get('password/reset', 'Auth\ForgotPasswordController@showLinkRequestForm')->name('password.request');
-                $this->post('password/email', 'Auth\ForgotPasswordController@sendResetLinkEmail')->name('password.email');
-                $this->get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm')->name('password.reset');
-                $this->post('password/reset', 'Auth\ResetPasswordController@reset');
-        */
 
         foreach (array_keys($this->routers()) as $name) {
             $router = $this->router($name);
@@ -175,7 +161,7 @@ class TAO
 
     /**
      * @param $name
-     * @return mixed
+     * @return Router|bool
      */
     public function router($name)
     {
@@ -186,6 +172,7 @@ class TAO
             }
             return $this->routers[$name];
         }
+        return false;
     }
 
     public function datatypeClasses()
@@ -206,6 +193,11 @@ class TAO
         return $datatypes[$name];
     }
 
+    /**
+     * @param string $name
+     * @param string|null $default
+     * @return Model
+     */
     public function datatype($name, $default = null)
     {
         $class = $this->datatypeClass($name);
@@ -229,6 +221,9 @@ class TAO
         return array_keys($this->datatypeClasses());
     }
 
+    /**
+     * @return Model[]
+     */
     public function datatypes()
     {
         $datatypes = array();
@@ -311,12 +306,12 @@ class TAO
 
     public function isIterable(&$object)
     {
-        return is_array($object) || $object instanceof Traversable;
+        return is_array($object) || $object instanceof \Traversable;
     }
 
     public function navigation($name = 'site')
     {
-        return \TAO\Navigation::instance($name);
+        return Navigation::instance($name);
     }
 
     public function setMeta($name, $value)

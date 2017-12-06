@@ -1,6 +1,7 @@
 <?php
 
 namespace TAO\Fields\Controllers;
+use Illuminate\Support\Facades\Auth;
 use TAO\Fields;
 use TAO\Request;
 
@@ -186,6 +187,7 @@ trait Table
             'with_row_actions' => ($this->canEdit || $this->canDelete || $this->canCopy),
             'pager_callback' => array($this, 'pageUrl'),
             'page' => $this->page,
+            'user' => Auth::user()
         ]);
     }
 
@@ -212,6 +214,7 @@ trait Table
             'add_text' => $this->datatype()->adminAddButtonText(),
             'with_filter' => false,
             'with_row_actions' => ($this->canEdit || $this->canDelete || $this->canCopy),
+            'user' => Auth::user()
         ]);
     }
 

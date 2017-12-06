@@ -2,6 +2,7 @@
 
 namespace TAO\Admin;
 
+use Illuminate\Support\Facades\Auth;
 use TAO\Fields\Controllers\Actions;
 use TAO\Fields\Controllers\Forms;
 use TAO\Fields\Controllers\Table;
@@ -26,7 +27,7 @@ class TableController extends AdminController
     {
         $acc = parent::accessAction($method, $parameters);
         if ($acc === true) {
-            if (!$this->datatype()->accessAdmin()) {
+            if (!$this->datatype()->accessAdmin(Auth::user())) {
                 return false;
             }
         }

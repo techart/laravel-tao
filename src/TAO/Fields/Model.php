@@ -260,7 +260,7 @@ abstract class Model extends \Illuminate\Database\Eloquent\Model
             return $this->treeForSelect($args);
         }
         $out = Collection::numericKeysOnly($args);
-        foreach ($this->get() as $row) {
+        foreach ($this->ordered()->get() as $row) {
             $out[$row->getKey()] = $row->title();
         }
         return $out;

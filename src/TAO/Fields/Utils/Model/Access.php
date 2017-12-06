@@ -1,6 +1,8 @@
 <?php
 
 namespace TAO\Fields\Utils\Model;
+use TAO\Fields\Model\User;
+use TAO\Navigation;
 
 /**
  * Class Access
@@ -47,6 +49,16 @@ trait Access
             return $user->checkAccess($group);
         }
         return false;
+    }
+
+    /**
+     * @param Navigation $menuItem
+     * @param User $user
+     * @return mixed
+     */
+    public function accessAdminMenuItem($menuItem, $user)
+    {
+        return $this->accessAdmin($user);
     }
 
     /**

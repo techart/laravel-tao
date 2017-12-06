@@ -31,11 +31,11 @@ class Navigation
     public $data = array();
 
     /**
-     * @var
+     * @var Navigation[]
      */
     protected $sub;
     /**
-     * @var bool
+     * @var array
      */
     protected $filter = array();
     /**
@@ -177,12 +177,18 @@ class Navigation
 
     public function checkAccess()
     {
-        if (!$this->access) {
+        if (is_null($this->access)) {
             return true;
+        }
+        if (is_bool($this->access)) {
+            return $this->access;
         }
         $user = \Auth::user();
         if (!$user) {
             return false;
+        }
+        if (Type::isCallable($this->access)) {
+            return Callback::instance($this->access)->call($this, $user);
         }
         return $user->checkAccess($this->access);
     }
@@ -437,7 +443,7 @@ class Navigation
     }
 
     /**
-     * @return bool
+     * @return Navigation|bool
      */
     public function selectedNode()
     {
