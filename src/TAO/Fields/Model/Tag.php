@@ -2,6 +2,7 @@
 
 namespace TAO\Fields\Model;
 
+use Illuminate\Database\Eloquent\Builder;
 use TAO\Fields\Model as AbstractModel;
 
 abstract class Tag extends AbstractModel
@@ -41,6 +42,9 @@ abstract class Tag extends AbstractModel
         }
     }
 
+    /**
+     * @return Builder
+     */
     public function ordered()
     {
         return $this->orderBy('title');

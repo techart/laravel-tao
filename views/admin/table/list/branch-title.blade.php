@@ -1,6 +1,6 @@
 <td class="admin-tree-title">
   <div class="bullet bullet-level-{{ $level }}">&nbsp;</div>
-  @if ($row->isSortable)
+  @if ($row->checkIfSortable())
     <div class="controls">
       @if (!$row->isFirstBranch)
         <a class="control" href="{{ url($controller->actionUrl('weight', ['id' => $row->getKey(), 'with' => $row->prevBranch->getKey() ])) }}"><i class="up">&nbsp;</i></a>

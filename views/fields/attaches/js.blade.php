@@ -3,34 +3,29 @@
         var files = {!! $field->renderFilelistJSON() !!};
         var $button = $("#tao_attaches_button_{{ $field->name }}");
         var $informer = $("#tao_attaches_informer_{{ $field->name }}");
-        var $filelist = $("#tao_attaches_filelist_{{ $field->name }}");
         var $hidden = $("#tao_attaches_hidden_{{ $field->name }}");
-
-        function renderFileList() {
-            $filelist.empty();
-            var count = 0;
-            $.each(files, function (key, data) {
-                var $name;
-                $del = $('<a>').addClass('delete').attr('href', 'javascript:void(0)').html('&nbsp;').click(function() {
-                    if (confirm('Вы уверены?')) {
-                        deleteFromFileList(key);
-                    }
-                });
-                if (data.new) {
-                    $name = $('<span>').addClass('file-name').text(data.name);
-                } else {
-                    $name = $('<a>').addClass('file-name').attr('href', data.url).text(data.name);
+        var $filelist = $("#tao_attaches_filelist_{{ $field->name }}");
+        
+        @if ($field->isSortable())
+            {{ \Assets::useBottomScript('/tao/scripts/jquery-ui.min.js') }}
+            {{ \Assets::useFile('/tao/styles/jquery-ui.css') }}
+            $filelist.sortable({
+                update: function() {
+                    var items = $(this).sortable('toArray');
+                    var newfiles = {};
+                    $.each(items, function(key, data) {
+                        var $e = $('#' + data);
+                        var key = $e.attr('data-key');
+                        newfiles[key] = files[key];
+                    });
+                    files = newfiles;
+                    renderFileList();
                 }
-                var $entry = $('<div>').addClass('entry').addClass('entry-'+key).append($name).append($del);
-                $filelist.append($entry);
-                count++;
             });
-            if (count==0) {
-              $filelist.append('<div class="message-empty">Нет файлов</div>');
-            }
-            $hidden.val(JSON.stringify(files));
-        }
-
+        @endif
+        
+        @include("fields ~ attaches.{$field->templateFilelistJS()}")
+        
         function deleteFromFileList(key) {
             delete files[key];
             renderFileList();

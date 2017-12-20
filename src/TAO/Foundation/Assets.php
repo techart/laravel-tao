@@ -1,6 +1,6 @@
 <?php
 
-namespace TAO;
+namespace TAO\Foundation;
 
 class Assets
 {

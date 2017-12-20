@@ -1,9 +1,11 @@
 <?php
 
-namespace TAO;
+namespace TAO\Foundation;
 
-use TAO\Facades\Assets;
 use TAO\Fields\Model;
+use TAO\Frontend\Manager;
+use TAO\Navigation;
+use TAO\Router;
 
 class TAO
 {
@@ -183,26 +185,30 @@ class TAO
         return $this->datatypes;
     }
 
-
-    public function datatypeClass($name, $default = null)
+    /**
+     * @param $name
+     * @return string
+     * @throws \UnknownDatatype
+     */
+    public function datatypeClass($name)
     {
         $datatypes = $this->datatypeClasses();
-        if (!isset($datatypes[$name]) && !is_null($default)) {
-            return $default;
+        if (!isset($datatypes[$name])) {
+            throw new \UnknownDatatype($name);
         }
         return $datatypes[$name];
     }
 
     /**
      * @param string $name
-     * @param string|null $default
      * @return Model
+     * @throws \UnknownDatatype
      */
-    public function datatype($name, $default = null)
+    public function datatype($name)
     {
         $class = $this->datatypeClass($name);
         if (empty($class)) {
-            return $default;
+            throw new \UnknownDatatype($name);
         }
         return app()->make($class);
     }
@@ -297,7 +303,7 @@ class TAO
 
     public function path($extra = false)
     {
-        $path = str_replace('/src/TAO', '', __DIR__);
+        $path = str_replace('/src/TAO/Foundation', '', __DIR__);
         if ($extra) {
             $path .= "/$extra";
         }
@@ -311,22 +317,22 @@ class TAO
 
     public function navigation($name = 'site')
     {
-        return Navigation::instance($name);
+        return \TAO\Navigation::instance($name);
     }
 
     public function setMeta($name, $value)
     {
-        Assets::setMeta($name, $value);
+        \Assets::setMeta($name, $value);
     }
 
     public function setMetas($metas)
     {
-        Assets::setMetas($metas);
+        \Assets::setMetas($metas);
     }
 
     public function meta()
     {
-        return Assets::meta();
+        return \Assets::meta();
     }
 
     public function render($template, $context = array())
@@ -402,6 +408,6 @@ class TAO
 
     public function frontend($path = false, $options = [])
     {
-        return Frontend\Manager::instanse($path, $options);
+        return Manager::instanse($path, $options);
     }
 }

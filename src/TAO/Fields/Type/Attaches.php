@@ -5,8 +5,9 @@ namespace TAO\Fields\Type;
 use Illuminate\Database\Schema\Blueprint;
 use TAO\Fields\Field;
 use TAO\Fields\FileField;
+use TAO\Fields\Type\Attaches\Entry;
 
-class Attaches extends StringField
+class Attaches extends StringField implements \IteratorAggregate
 {
     use FileField;
 
@@ -20,8 +21,18 @@ class Attaches extends StringField
         return '{translit}.{ext}';
     }
 
-    public function value()
+    public function defaultInfo()
     {
+        $defs = [];
+        foreach($this->infoFields() as $name => $data) {
+            $defs[$name] = $data['default'];
+        }
+        return $defs;
+    }
+
+    public function value($raw = false)
+    {
+        $defs = $this->defaultInfo();
         $value = unserialize(parent::value());
         $out = [];
         if (is_array($value)) {
@@ -31,16 +42,123 @@ class Attaches extends StringField
                     $data['key'] = $key;
                     $data['new'] = false;
                     $data['url'] = \Storage::url($data['path']);
-                    $out[$key] = $data;
+                    if (!isset($data['info'])) {
+                        $data['info'] = $defs;
+                    }
+                    if ($raw) {
+                        $out[$key] = $data;
+                    } else {
+                        $out[$key] = new Entry($data);
+
+                    }
                 }
             }
         }
         return $out;
     }
 
+    public function getIterator()
+    {
+        return new \ArrayIterator($this->value());
+    }
+
     public function renderFilelistJSON()
     {
-        return json_encode((object)$this->value());
+        return json_encode((object)$this->value(true));
+    }
+
+    public function isSortable()
+    {
+        return $this->param('sortable', false);
+    }
+
+    public function infoFieldsSrc()
+    {
+        return $this->param('info', []);
+    }
+
+    public function infoFields()
+    {
+        $out = [];
+        foreach($this->infoFieldsSrc() as $name => $data) {
+            if (is_array($data)) {
+                $out[$name] = $data;
+            } else {
+                $label = $data;
+                $type = 'string';
+                if ($m = \TAO::regexp('{^(.+)\s+(.+)$}', $name)) {
+                    $type = strtolower(trim($m[1]));
+                    $name = trim($m[2]);
+                }
+                $out[$name] = [
+                    'type' => $type,
+                    'name' => $name,
+                    'label' => $label,
+                ];
+            }
+            $type = isset($out[$name]['type'])? $out[$name]['type'] : 'string';
+            $default = isset($out[$name]['default'])? $out[$name]['default'] : null;
+            if (is_null($default)) {
+                if ($type == 'date') {
+                    $default = date('d.m.Y');
+                }
+                elseif ($type == 'checkbox') {
+                    $default = 0;
+                }
+                else {
+                    $default = '';
+                }
+            }
+            $out[$name]['type'] = $type;
+            $out[$name]['default'] = $default;
+        }
+        return $out;
+    }
+
+    public function withInfo()
+    {
+        $fields = $this->infoFields();
+        return !empty($fields);
+    }
+
+    public function infoFieldId($name)
+    {
+        return "ifield_{$this->name}_{$name}";
+    }
+
+    public function templateJS()
+    {
+        return 'js';
+    }
+
+    public function templateEditInfoJS()
+    {
+        return 'js-info';
+    }
+
+    public function templateEntryJS()
+    {
+        return 'js-entry';
+    }
+
+    public function templateFilelistJS()
+    {
+        return 'js-filelist';
+    }
+
+    public function filelistClass()
+    {
+        return 'tao-fields-attaches-filelist';
+    }
+
+    public function extraCSS()
+    {
+        return [];
+    }
+
+    public function extraJS()
+    {
+        return [];
     }
 
     public function setFromRequestAfterSave($request)
@@ -154,6 +272,7 @@ class Attaches extends StringField
             'url' => false,
             'new' => true,
             'key' => $key,
+            'info' => $this->defaultInfo(),
         ];
     }
 

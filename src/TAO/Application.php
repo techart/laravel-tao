@@ -50,7 +50,7 @@ class Application extends \Illuminate\Foundation\Application
     public function request()
     {
         if (is_null($this->taoRequest)) {
-            $this->taoRequest = Request::capture();
+            $this->taoRequest = \TAO\Foundation\Request::capture();
         }
         return $this->taoRequest;
     }

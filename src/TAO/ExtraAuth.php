@@ -11,8 +11,7 @@ class ExtraAuth {
         $result = $this->process($email, $password);
         if (is_array($result) && isset($result['name'])) {
             $name = $result['name'];
-            $user = app()->make(\TAO\Fields\Model\User::class);
-            $users = $user->where('email', $email)->take(1)->get();
+            $users = \TAO::datatype('users')->where('email', $email)->take(1)->get();
             if (count($users) == 0) {
                 $user = \TAO::datatype('users')->newInstance();
                 $user->field('name')->set($name);

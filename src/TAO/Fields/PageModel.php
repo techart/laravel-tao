@@ -2,82 +2,36 @@
 
 namespace TAO\Fields;
 
+use Illuminate\Database\Eloquent\Builder;
+
+/**
+ * Class PageModel
+ * @package TAO\Fields
+ *
+ * Абстрактный класс для страничных моделей
+ */
 abstract class PageModel extends Model
 {
-    public function calculatedFields()
-    {
-        $fields = $this->fields();
-        $extra = array(
-            'isactive' => array(
-                'type' => 'checkbox index',
-                'label' => 'Включено к показу',
-                'label_in_admin_list' => 'Вкл',
-                'default' => 1,
-                'weight' => -900,
-                'in_list' => true,
-                'in_form' => true,
-                'group' => 'common',
-            ),
-            'url' => array(
-                'type' => 'string(250) index',
-                'label' => 'URL',
-                'style' => 'width:70%;',
-                'weight' => -800,
-                'in_list' => false,
-                'in_form' => true,
-                'group' => 'common',
-            ),
-            'title' => array(
-                'type' => 'string(250)',
-                'label' => 'Заголовок',
-                'style' => 'width:90%;',
-                'weight' => -700,
-                'in_list' => true,
-                'in_form' => true,
-                'group' => 'common',
-            ),
-            'meta_title' => array(
-                'type' => 'string(250)',
-                'label' => 'Title',
-                'style' => 'width:90%;',
-                'weight' => 900100,
-                'in_list' => false,
-                'in_form' => true,
-                'group' => 'common.meta',
-            ),
-            'meta_description' => array(
-                'type' => 'text',
-                'label' => 'Description',
-                'weight' => 900200,
-                'in_list' => false,
-                'in_form' => true,
-                'style' => 'width: 90%; height:100px;',
-                'group' => 'common.meta',
-            ),
-            'meta_keywords' => array(
-                'type' => 'text',
-                'label' => 'Keywords',
-                'weight' => 900300,
-                'in_list' => false,
-                'in_form' => true,
-                'style' => 'width: 90%; height:100px;',
-                'group' => 'common.meta',
-            ),
-        );
-        foreach ($extra as $field => $data) {
-            if (isset($fields[$field])) {
-                if ($fields[$field] === false) {
-                    unset($fields[$field]);
-                } else {
-                    $fields[$field] = \TAO::merge($data, $fields[$field]);
-                }
-            } else {
-                $fields[$field] = $data;
-            }
-        }
-        return $fields;
+    use \TAO\Fields\Extra\Switchable,
+        \TAO\Fields\Extra\Addressable,
+        \TAO\Fields\Extra\Title,
+        \TAO\Fields\Extra\Metas;
+
+    use \TAO\Fields\Extra\Addressable {
+        getAccessibleItemByUrl as private parentAccessibleItemByUrl;
     }
 
+    /**
+     *
+     */
+    protected function initExtraFields()
+    {
+        $this->initExtra('Switchable', 'Addressable', 'Title', 'Metas');
+    }
+
+    /**
+     * @return array
+     */
     public function adminFormGroups()
     {
         return array(
@@ -88,117 +42,35 @@ abstract class PageModel extends Model
         );
     }
 
-    public function url()
-    {
-        $url = trim($this->field('url')->value());
-        if ($url == '') {
-            return $this->itemUrl($this);
-        }
-        return $url;
-    }
-
     /**
-     * @param Model|string $item
-     * @return string
-     */
-    public function itemUrl($item)
-    {
-        $id = is_object($item) ? $item->getKey() : $item;
-        $url = '/' . $this->getDatatype() . "/{$id}/";
-        return $url;
-    }
-
-    public function itemRoutes()
-    {
-        $url = $this->itemUrl('{id}');
-        \Route::any($url, function ($id) {
-            /**
-             * @var PageModel $item
-             */
-            $item = $this->find($id);
-            if ($item->isactive) {
-                $itemUrl = $item->url();
-                $request = app()->request();
-                $url = $request->getPathInfo();
-                if ($url != $itemUrl) {
-                    return \Redirect::away($itemUrl, 301);
-                }
-                return $this->renderItemPage($item);
-            }
-        })->where('id', '^\d+$');
-    }
-
-    protected function beforeRender($data, $view)
-    {
-        parent::beforeRender($data, $view);
-        if (isset($data['mode']) && $this->isPageMetasSettingRequired($data['mode'])) {
-            $this->setPageMetas();
-        }
-    }
-
-    /**
-     * Возвращает true, если в указанном режиме отображения модели нужно установить ее meta-теги
+     * Переопределяем стандартные методы, т.к. нужно учитывать isactive
      *
-     * @param $renderMode
-     * @return bool
+     * @param $url
+     * @return null|Model
      */
-    protected function isPageMetasSettingRequired($renderMode)
+    public function getAccessibleItemByUrl($url)
     {
-        return $renderMode == 'full';
+        $item = $this->parentAccessibleItemByUrl($url);
+        return (is_object($item) && $item->isactive)? $item : null;
     }
 
     /**
-     * Устанавливает меты модели на текущей страницы
+     * @param $id
+     * @return null|Model
      */
-    public function setPageMetas()
+    public function getAccessibleItemById($id)
     {
-        \TAO::setMetas($this->getPageMetas());
+        $item = parent::getAccessibleItemById($id);
+        return $item->isactive? $item : null;
     }
 
     /**
-     * Формирует список мет текущей модели. Игнорирует меты с пустым значением.
-     *
-     * @return array
+     * @param array $data
+     * @return Builder
      */
-    public function getPageMetas()
+    public function getAccessibleItems($data = [])
     {
-        return array_filter([
-            'title' => $this->getMetaTitle(),
-            'description' => $this->getMetaDescription(),
-            'keywords' => $this->getMetaKeywords()
-        ]);
+        return $this->ordered()->where('isactive', 1);
     }
 
-    public function getMetaTitle()
-    {
-        return $this->getMeta('title', $this->title());
-    }
-
-    public function getMetaDescription()
-    {
-        return $this->getMeta('description');
-    }
-
-    public function getMetaKeywords()
-    {
-        return $this->getMeta('keywords');
-    }
-
-    /**
-     * Возвращает значение меты $name модели. Ищет значение в поле meta_{metaname}, если значение отсутсвует, то
-     * возвращает $defaultValue.
-     *
-     * @param $name
-     * @param string $defaultValue
-     * @return string
-     */
-    public function getMeta($name, $defaultValue = '')
-    {
-        $meta = $defaultValue;
-        $field = $this->field('meta_' . $name);
-        if ($field->isNotEmpty()) {
-            $meta = $field->value();
-        }
-        return $meta;
-    }
 }

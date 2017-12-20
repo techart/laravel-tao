@@ -62,7 +62,7 @@ class Provider extends ServiceProvider
         });
         
         $this->app->singleton('tao', function() {
-            $tao = app()->make('\\TAO\\TAO');
+            $tao = app()->make('\TAO\Foundation\TAO');
             $tao->app = $this->app;
             return $tao;
         });
@@ -80,7 +80,7 @@ class Provider extends ServiceProvider
         });
 
         $this->app->singleton('taoAssets', function() {
-            $assets = app()->make(\TAO\Assets::class);
+            $assets = app()->make(\TAO\Foundation\Assets::class);
             $assets->init();
             return $assets;
         });

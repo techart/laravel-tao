@@ -24,12 +24,12 @@ trait View
         return $default;
     }
 
-    public function renderListPage($data = [])
+    public function renderListPage1($data = [])
     {
         $data['page'] = $page = isset($data['page']) ? $data['page'] : 1;
         $data['per_page'] = $perPage = isset($data['per_page']) ? $data['per_page'] : 10;
         $data['mode'] = $mode = isset($data['mode']) ? $data['mode'] : 'list';
-        $data['listing'] = $selector = isset($data['listing']) ? $data['listing'] : 'getItems';
+        $data['listing'] = $selector = isset($data['listing']) ? $data['listing'] : 'getAccessibleItems';
         $data['pager_callback'] = isset($data['pager_callback']) ? $data['pager_callback'] : [$this, 'listUrl'];
         if (isset($data['base'])) {
             $this->baseListUrl('/' . $data['base'] . '/');
@@ -55,14 +55,33 @@ trait View
         return view($view, $data);
     }
 
+    /**
+     * Рендер детальной страницы итема.
+     * На вход могут приходить данные в следующих вариантах:
+     *
+     * 1. Сам объект итема
+     * 2. Массив, в котором есть элемент item
+     * 3. Массив, в котором есть элемент id (в этом случае для чтения итема вызывается метод getAccessibleItemById)
+     * 3. Массив, в котором есть элементы id и finder (имя метода вместо getAccessibleItemById)
+     *
+     * Если итема нет (не пришел и не найден), то отдается 404
+     * Если итем найден, то он рендерится через метод render.
+     * Если на вход пришел массив, то он передается в метод render
+     *
+     * @param array $data
+     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Symfony\Component\HttpFoundation\Response
+     */
     public function renderItemPage($data = [])
     {
+        if (is_object($data)) {
+            $data = ['item' => $data];
+        }
         if (isset($data['item'])) {
             $item = $data['item'];
         } else {
-            $selector = isset($data['selector']) ? $data['selector'] : 'getItemById';
+            $finder = isset($data['finder']) ? $data['finder'] : 'getAccessibleItemById';
             $id = isset($data['id']) ? $data['id'] : 0;
-            $item = $this->$selector($id);
+            $item = $this->$finder($id);
         }
         if ($item instanceof Builder) {
             $item = $item->first();
@@ -74,6 +93,12 @@ trait View
         return $item->render($data);
     }
 
+    /**
+     * Рендер итема, в контексте которого вызываатся
+     *
+     * @param array $data
+     * @return ViewFactory|\Illuminate\View\View|void
+     */
     public function render($data = [])
     {
         $data['mode'] = isset($data['mode']) ? $data['mode'] : 'teaser';
@@ -93,6 +118,15 @@ trait View
         return view($view, $data);
     }
 
+    /**
+     * Хук перед рендером итема. Можно модифицировать сам итем, данные передаваемые в шаблон, а также респонс
+     *
+     * Если возвращает массив, то он мержится с даннымиЮ передаваемыми в шаблон
+     * Если возвращает респонс, то он от отправится по инстанциям вместо результата рендера (имеет смысл только при рендере целой страницы)
+     *
+     * @param $data - данные, передаваемые в шаблон
+     * @param $view - имя шаблона
+     */
     protected function beforeRender($data, $view)
     {
     }

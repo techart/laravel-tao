@@ -6,6 +6,6 @@
     @include('table ~ list.actions')
 </tr>
 
-@foreach($row->childs as $row)
+@foreach($row->children as $row)
     @include('table ~ list.branch', ['level' => $level+1, 'row' => $row])
 @endforeach

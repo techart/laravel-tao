@@ -1,5 +1,5 @@
 @extends('~layout')
 
 @section('content')
-<b>Admin Dashboard1</b>
+<b>Admin Dashboard</b>
 @endsection

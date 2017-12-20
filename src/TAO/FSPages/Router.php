@@ -13,8 +13,12 @@ class Router extends \TAO\Router
 
         $paths = array(
             resource_path("{$path}/index.php"),
+            resource_path("{$path}/index.phtml"),
+            resource_path("{$path}.phtml"),
             resource_path("{$path}.php"),
+            __DIR__."/../../../{$path}/index.phtml",
             __DIR__."/../../../{$path}/index.php",
+            __DIR__."/../../../{$path}.phtml",
             __DIR__."/../../../{$path}.php",
         );
         foreach($paths as $fpath) {

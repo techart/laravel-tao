@@ -380,18 +380,64 @@ td.admin-tree-title {}
   }
 
     .tao-fields-attaches-filelist .entry {
-      display: inline-block;
-      margin: 0 10px 0 0;
+      margin: 0 0 0 0;
       padding: 2px 2px 2px 5px;
+    }
+    
+    .tao-fields-attaches-filelist .attaches-entry {
+      display: inline-block;
       background-color: #eee;
     }
+    
+    .tao-fields-attaches-filelist .documents-entry {
+      position: relative;
+      display: block;
+      padding: 5px 50px 5px 5px;
+      border-bottom: 1px dotted #eee;
+    }
+    
+    .tao-fields-attaches-filelist .documents-entry:hover {
+      background-color: #efefef;
+    }
+    
+      .tao-fields-attaches-filelist .documents-entry .date {
+        display: inline-block;
+        background-color: #888;
+        color: #fff;
+        font-size: 12px;
+        padding: 1px 5px;
+        margin: 0 5px 0 0;
+      }
 
+      .tao-fields-attaches-filelist .documents-entry a.delete {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+      }
+
+      .tao-fields-attaches-filelist .documents-entry a.edit {
+        position: absolute;
+        top: 5px;
+        right: 25px;
+      }
+      
       .tao-fields-attaches-filelist .entry a.delete {
         display: inline-block;
         margin: 0 0 0 3px;
         width: 16px;
         height: 19px;
         background-image: url(/tao/images/del16x16.png);
+        background-repeat: no-repeat;
+        background-position: 0 3px;
+        text-decoration: none;
+      }
+
+      .tao-fields-attaches-filelist .entry a.edit {
+        display: inline-block;
+        margin: 0 0 0 10px;
+        width: 16px;
+        height: 19px;
+        background-image: url(/tao/images/edit16x16.png);
         background-repeat: no-repeat;
         background-position: 0 3px;
         text-decoration: none;
@@ -411,6 +457,35 @@ td.admin-tree-title {}
       left: 0;
       z-index: 1;
     }
+
+.tao-fields-attaches__iform {
+}
+
+    .tao-fields-attaches__iform .field {
+        margin: 10px 0;
+    }
+    .tao-fields-attaches__iform label {
+        display: inline-block;
+        vertical-align: top;
+        padding: 4px 20px 0 0;
+        width: 150px;
+        text-align: right;
+    }
+    .tao-fields-attaches__iform .input {
+        display: inline-block;
+        padding: 0 0 10px 0;
+        width: 300px;
+    }
+
+        .tao-fields-attaches__iform .text {
+            width: 95%;
+        }
+        
+        .tao-fields-attaches__iform .cb {
+            border: 1px solid #888;
+            display: block;
+        }
+
 
 .multilink-items {
     border: 1px solid #ccc;

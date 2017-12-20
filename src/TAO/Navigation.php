@@ -392,46 +392,53 @@ class Navigation
     /**
      * @return bool|null
      */
-    public function isSelected()
+    public function isSelected($defTrue = true, $defFalse = false)
     {
         if (!is_null($this->selected)) {
             if (is_callable($this->selected)) {
-                return call_user_func($this->selected, $this);
+                return call_user_func($this->selected, $this)? $defTrue : $defFalse;
             }
-            return $this->selected;
+            return $this->selected? $defTrue : $defFalse;
         }
         if (!empty($this->flag)) {
             if (\TAO::isIterable($this->flag)) {
                 foreach ($this->flag as $flag) {
                     if ($this->isFlag($flag)) {
-                        return $this->selected = true;
+                        $this->selected = true;
+                        return $defTrue;
                     }
                 }
             } elseif (is_string($this->flag) && $this->isFlag($this->flag)) {
-                return $this->selected = true;
+                $this->selected = true;
+                return $defTrue;
             }
         }
         if (\TAO\Urls::isCurrent($this->url)) {
-            return $this->selected = true;
+            $this->selected = true;
+            return $defTrue;
         }
         if (!empty($this->match) && is_string($this->match)) {
             if ($this->match == '*') {
                 if (\TAO\Urls::isCurrentStartsWith($this->url)) {
-                    return $this->selected = true;
+                    $this->selected = true;
+                    return $defTrue;
                 }
             } elseif (mb_substr($this->match, mb_strlen($this->match) - 1) == '*') {
                 $m = mb_substr($this->match, 0, mb_strlen($this->match) - 1);
                 if (\TAO\Urls::isCurrentStartsWith($m)) {
-                    return $this->selected = true;
+                    $this->selected = true;
+                    return $defTrue;
                 }
             }
         }
         foreach ($this->links() as $link) {
             if ($link->isSelected()) {
-                return $this->selected = true;
+                $this->selected = true;
+                return $defTrue;
             }
         }
-        return $this->selected = false;
+        $this->selected = false;
+        return $defFalse;
     }
 
     /**
@@ -501,6 +508,17 @@ class Navigation
     {
         $tpl = $tpl ? $tpl : $this->defaultTemplate;
         $args['links'] = $this->links();
+        if ($this->isRoute) {
+            if (!isset($args['main'])) {
+                $args['main'] = 'Главная';
+            }
+            if (!isset($args['main_url'])) {
+                $args['main_url'] = '/';
+            }
+            if (!isset($args['delimiter'])) {
+                $args['delimiter'] = ' &nbsp;&gt;&nbsp; ';
+            }
+        }
         return view("navigation ~ {$tpl}", $args);
     }
 }

@@ -14,7 +14,7 @@ use TAO\Type\Collection;
  * @package TAO\Fields
  *
  * @method orderBy(string $column, string $direction = 'asc')
- * @method \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Collection|static[]|static|null find(mixed $id, array $columns)
+ * @method Model|\Illuminate\Database\Eloquent\Collection|static[]|static|null find(mixed $id, array $columns = ['*'])
  * @method $this where(string|array|\Closure $column, string $operator = null, mixed $value = null, string $boolean = 'and')
  */
 abstract class Model extends \Illuminate\Database\Eloquent\Model
@@ -33,21 +33,6 @@ abstract class Model extends \Illuminate\Database\Eloquent\Model
     /**
      * @var array
      */
-    public $childs = [];
-
-    /**
-     * @var bool
-     */
-    public $isTree = false;
-
-    public $isFirstBranch = false;
-
-    public $isLastBranch = false;
-
-    public $prevBranch = false;
-
-    public $nextBranch = false;
-
     public $typeTitle = false;
 
     /**
@@ -64,6 +49,12 @@ abstract class Model extends \Illuminate\Database\Eloquent\Model
      * @var array
      */
     protected $fields = array();
+
+    /**
+     * @var array
+     */
+    protected $extraFields = array();
+
     /**
      * @var
      */
@@ -132,12 +123,46 @@ abstract class Model extends \Illuminate\Database\Eloquent\Model
      */
     abstract public function fields();
 
+    protected function initExtraFields()
+    {
+    }
+
+    protected function initExtra()
+    {
+        foreach(func_get_args() as $arg) {
+            $method = "initExtra{$arg}";
+            $this->$method();
+        }
+    }
+
+    public function checkIfTree()
+    {
+        return method_exists($this, 'isTree')? $this->isTree() : false;
+    }
+
+    public function checkIfSortable()
+    {
+        return method_exists($this, 'isSortable')? $this->isSortable() : false;
+    }
+
     /**
      * @return mixed
      */
     public function calculatedFields()
     {
         $fields = $this->fields();
+        $this->initExtraFields();
+        foreach ($this->extraFields as $field => $data) {
+            if (isset($fields[$field])) {
+                if ($fields[$field] === false) {
+                    unset($fields[$field]);
+                } else {
+                    $fields[$field] = \TAO::merge($data, $fields[$field]);
+                }
+            } else {
+                $fields[$field] = $data;
+            }
+        }
         return $fields;
     }
 
@@ -256,107 +281,12 @@ abstract class Model extends \Illuminate\Database\Eloquent\Model
     public function itemsForSelect($args = false)
     {
         $args = Collection::parseString($args);
-        if ($this->isTree) {
+        if ($this instanceof \TAO\Fields\Extra\Tree) {
             return $this->treeForSelect($args);
         }
         $out = Collection::numericKeysOnly($args);
         foreach ($this->ordered()->get() as $row) {
             $out[$row->getKey()] = $row->title();
-        }
-        return $out;
-    }
-
-    /**
-     * @param array $args
-     * @return array
-     */
-    public function treeForSelect($args = [])
-    {
-        $args = Collection::parseString($args);
-        $tree = $this->buildTree($args);
-
-        $out = Collection::numericKeysOnly($args);
-        $this->buildTreeForSelect($tree, '-&nbsp;&nbsp;&nbsp;', $out);
-        return $out;
-    }
-
-    /**
-     * @param Model[] $tree
-     * @param string $prefix
-     * @param array $out
-     */
-    protected function buildTreeForSelect(&$tree, $prefix, &$out)
-    {
-        foreach ($tree as $key => $row) {
-            $out[$key] = $prefix . $row->title();
-            $this->buildTreeForSelect($row->childs, $prefix . '-&nbsp;&nbsp;&nbsp;', $out);
-        }
-    }
-
-    /**
-     * @param array $filter
-     * @return Model[]
-     */
-    public function buildTree($filter = [])
-    {
-        $root = isset($filter['root']) ? $filter['root'] : 0;
-        $maxDepth = isset($filter['max_depth']) ? $filter['max_depth'] : 10000;
-        return $this->buildTreeFromRows($this->get()->getDictionary(), $root, $maxDepth);
-    }
-
-    /**
-     * @param Builder $query
-     * @param int $root
-     * @param int $maxDepth
-     * @return array
-     */
-    public function buildTreeFromQuery($query, $root = 0, $maxDepth = 10000)
-    {
-        return $this->buildTreeFromRows($query->get(), $root, $maxDepth);
-    }
-
-    /**
-     * @param \Illuminate\Support\Collection|Model[] $rows
-     * @param int $root
-     * @param int $maxDepth
-     * @return array
-     */
-    public function buildTreeFromRows($rows, $root = 0, $maxDepth = 10000)
-    {
-        return $this->buildTreeBranch($rows, $root, $maxDepth);
-    }
-
-
-    /**
-     * @param \Illuminate\Support\Collection|Model[] $rows $rows
-     * @param int $root
-     * @param int $maxDepth
-     * @return Model[]
-     */
-    public function buildTreeBranch($rows, $root, $maxDepth = 10000)
-    {
-        $out = [];
-        $first = true;
-        $prev = false;
-        foreach ($rows as $key => $row) {
-            if ($row[$this->parentKeyField] == $root) {
-                if ($first) {
-                    $row->isFirstBranch = true;
-                    $first = false;
-                }
-                if ($prev) {
-                    $row->prevBranch = $prev;
-                    $prev->nextBranch = $row;
-                    $prev->isLastBranch = false;
-                }
-
-                if ($maxDepth>0) {
-                    $row->childs = $this->buildTreeBranch($rows, $key,$maxDepth-1);
-                }
-                $out[$key] = $row;
-                $prev = $row;
-                $row->isLastBranch = true;
-            }
         }
         return $out;
     }
@@ -399,20 +329,26 @@ abstract class Model extends \Illuminate\Database\Eloquent\Model
         return $dir;
     }
 
-    public function getItemByUrl($url)
+    /**
+     * Возвращает по ид итем, доступный для чтения текущему пользователю
+     *
+     * @param $id
+     * @return \Illuminate\Database\Eloquent\Collection|\Illuminate\Database\Eloquent\Model|null|Model|Model[]
+     */
+    public function getAccessibleItemById($id)
     {
-        return $this->where('url', $url)->where('isactive', 1);
+        return $this->find($id);
     }
 
-    public function getItemById($id)
+    /**
+     * Возвращает список итемов (query), доступных для чтения текущему пользователю
+     *
+     * @param array $data
+     * @return Builder
+     */
+    public function getAccessibleItems($data = [])
     {
-        $item = $this->find($id);
-        return $item->isactive ? $item : null;
-    }
-
-    public function getItems($data = [])
-    {
-        return $this->ordered()->where('isactive', 1);
+        return $this->ordered();
     }
 
     public function typeTitle()

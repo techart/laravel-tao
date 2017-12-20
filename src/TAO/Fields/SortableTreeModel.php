@@ -2,35 +2,23 @@
 
 namespace TAO\Fields;
 
+use Illuminate\Database\Eloquent\Builder;
+
 class SortableTreeModel extends TreeModel
 {
+    use \TAO\Fields\Extra\Sortable,
+        \TAO\Fields\Extra\Tree,
+        \TAO\Fields\Extra\Title;
 
-    public $isSortable = true;
-
-    public function calculatedFields()
+    protected function initExtraFields()
     {
-        $fields = parent::calculatedFields();
-        $extra = array(
-            'weight' => array(
-                'type' => 'integer index',
-                'in_list' => false,
-                'in_form' => false,
-            ),
-        );
-        foreach($extra as $field => $data) {
-            if (isset($fields[$field])) {
-                if ($fields[$field] === false) {
-                    unset($fields[$field]);
-                } else {
-                    $fields[$field] = \TAO::merge($data, $fields[$field]);
-                }
-            } else {
-                $fields[$field] = $data;
-            }
-        }
-        return $fields;
+        $this->initExtra('Sortable', 'Tree', 'Title');
+        $this->extraFields['title']['in_list'] = false;
     }
 
+    /**
+     * @return Builder
+     */
     public function ordered()
     {
         return $this->orderBy('weight')->orderBy('id');
@@ -38,6 +26,7 @@ class SortableTreeModel extends TreeModel
 
     public function beforeSave()
     {
+        parent::beforeSave();
         if ((int)$this['weight']==0) {
             $this['weight'] = (int)$this->max('weight')+1;
         }

@@ -155,7 +155,7 @@ trait Table
     {
         $this->initViews();
 
-        if ($this->datatype()->isTree) {
+        if ($this->datatype()->checkIfTree()) {
             return $this->treeAction();
         }
 
@@ -270,8 +270,8 @@ trait Table
     {
         foreach ($tree as $row) {
             $this->prepareRow($row);
-            if (isset($row->childs) && is_array($row->childs)) {
-                $this->prepareTree($row->childs);
+            if (isset($row->children) && is_array($row->children)) {
+                $this->prepareTree($row->children);
             }
         }
     }

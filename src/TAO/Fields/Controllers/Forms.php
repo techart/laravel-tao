@@ -72,7 +72,7 @@ trait Forms
     public function addAction()
     {
         $item = $this->datatype()->newInstance();
-        if (!$item || !$item->accessEdit(\Auth::user())) {
+        if (!$item || !$item->accessAdd(\Auth::user())) {
             return \TAO::pageNotFound();
         }
         $this->editItem = $item;

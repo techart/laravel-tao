@@ -20,6 +20,8 @@
         'upload' => \TAO\Fields\Type\Upload::class,
         'image' => \TAO\Fields\Type\Image::class,
         'attaches' => \TAO\Fields\Type\Attaches::class,
+        'documents' => \TAO\Fields\Type\Documents::class,
+        'gallery' => \TAO\Fields\Type\Gallery::class,
     ],
 
     'text' => [

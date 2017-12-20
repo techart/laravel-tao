@@ -358,8 +358,21 @@ abstract class Field
         if (isset($this->data['input_template'])) {
             return $this->data['input_template'];
         }
-        return "fields ~ {$this->type}.input";
+        return "fields ~ {$this->inputTemplateFrom()}.input";
     }
+
+    /**
+     *
+     * Мнемокод типа, из которого надо брать дефолтный шаблон инпута (по умолчанию - свой)
+     *
+     * @return string
+     */
+    public function inputTemplateFrom()
+    {
+        return $this->type;
+    }
+
+
 
     /**
      *

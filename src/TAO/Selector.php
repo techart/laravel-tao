@@ -36,7 +36,7 @@ class Selector
             }
         }
         if ($this->datatype) {
-            return $this->datatype->getItems();
+            return $this->datatype->getAccessibleItems();
         }
     }
 
@@ -85,7 +85,7 @@ class Selector
                     return false;
                 }
             }
-            $finder = isset($base['finder']) ? $base['finder'] : 'getItemByUrl';
+            $finder = isset($base['finder']) ? $base['finder'] : 'getAccessibleItemByUrl';
             $item = \TAO::datatype($base['url_of'])->$finder($url);
             if ($item instanceof \Illuminate\Database\Eloquent\Builder) {
                 $item = $item->first();

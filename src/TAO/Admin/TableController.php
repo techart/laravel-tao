@@ -82,7 +82,7 @@ class TableController extends AdminController
 
     protected function canAdd()
     {
-        return $this->datatype()->accessAdd();
+        return $this->datatype()->accessAdd(Auth::user());
     }
 
     protected function selectRows()
