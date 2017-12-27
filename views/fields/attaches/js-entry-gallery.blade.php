@@ -1,4 +1,4 @@
-var url = '{!! $field->previewUrl() !!}'+'&path='+files[key].path;
+var url = '{!! $field->adminPreviewUrl() !!}'+'&path='+files[key].path;
 
 var $description = $('<div>')
     .addClass('description')

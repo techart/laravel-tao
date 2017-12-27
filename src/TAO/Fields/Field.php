@@ -3,6 +3,7 @@
 namespace TAO\Fields;
 
 use Illuminate\Database\Schema\Blueprint;
+use TAO\Callback;
 
 /**
  *
@@ -680,6 +681,18 @@ abstract class Field
         return true;
     }
 
+    public function callParam($name, $default = null)
+    {
+        $cb = $this->param('renderable_entries');
+        if (Callback::isValidCallback($cb)) {
+            return Callback::instance($cb)->call($this);
+        }
+        if (Callback::isValidCallback($default)) {
+            return Callback::instance($default)->call($this);
+        }
+        return $default;
+    }
+
     /**
      * @return mixed
      */
@@ -687,5 +700,4 @@ abstract class Field
     {
         return $this->render();
     }
-
 }

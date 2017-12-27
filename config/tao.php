@@ -7,6 +7,7 @@
     ],
     
     'fields' => [
+        'dummy' => \TAO\Fields\Type\Dummy::class,
         'string' => \TAO\Fields\Type\StringField::class,
         'remember_token' => \TAO\Fields\Type\RememberToken::class,
         'date_integer' => \TAO\Fields\Type\DateInteger::class,

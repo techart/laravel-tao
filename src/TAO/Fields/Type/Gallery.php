@@ -38,12 +38,12 @@ class Gallery extends Attaches
         return $this->param('sortable', true);
     }
 
-    public function previewSize()
+    public function adminPreviewSize()
     {
         return $this->param('admin_preview_size', 177);
     }
 
-    public function previewUrl()
+    public function adminPreviewUrl()
     {
         return $this->apiUrl('preview', ['upload_id' => $this->tempId()]);
     }
@@ -59,7 +59,7 @@ class Gallery extends Attaches
                 } catch (NotReadableException $e) {
                 }
                 if ($image) {
-                    $size = $this->previewSize();
+                    $size = $this->adminPreviewSize();
                     return $image->resize($size, $size, function ($c) {
                         $c->aspectRatio();
                     })->response('jpg');
@@ -70,4 +70,21 @@ class Gallery extends Attaches
         return \Image::make(base_path('www/tao/images/exclamation-octagon-frame.png'))->response('png');
     }
 
+    public function defaultTemplate()
+    {
+        return 'fields ~ gallery.template';
+    }
+
+    public function entryTemplate()
+    {
+        return 'fields ~ gallery.entry';
+    }
+
+    protected function defaultContext()
+    {
+        $context = parent::defaultContext();
+        $context['preview_mods'] = $this->param('preview_mods', 'height100');
+        $context['full_mods'] = $this->param('full_mods', false);
+        return $context;
+    }
 }

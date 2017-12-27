@@ -85,6 +85,12 @@ class Provider extends ServiceProvider
             return $assets;
         });
 
+        $this->app->singleton('taoImages', function() {
+            $images = app()->make(\TAO\Foundation\Images::class);
+            $images->init();
+            return $images;
+        });
+
         $this->app->singleton('taoView', function() {
             $assets = app()->make(\TAO\View::class);
             $assets->init();

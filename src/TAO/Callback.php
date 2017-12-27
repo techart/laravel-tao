@@ -24,7 +24,7 @@ class Callback
     // TODO: изменить систему проверки на более универсальную
     public static function isValidCallback($callback)
     {
-        return $callback instanceof Callback || preg_match(static::$regexps['datatype'], $callback) || is_callable($callback);
+        return $callback instanceof Callback || (is_string($callback) && preg_match(static::$regexps['datatype'], $callback)) || is_callable($callback);
     }
 
     public static function instance($callback)
@@ -49,7 +49,7 @@ class Callback
 
     protected function parse($callback)
     {
-        if (preg_match(static::$regexps['datatype'], $callback, $m)) {
+        if (is_string($callback) && preg_match(static::$regexps['datatype'], $callback, $m)) {
             $datatype = \TAO\Facades\TAO::datatype($m[1]);
             if (!$datatype) {
                 throw new \InvalidCallbackParams("Unknown datatype {$datatype}");

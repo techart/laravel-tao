@@ -3,6 +3,7 @@
 namespace TAO\Fields\Type;
 
 use Illuminate\Database\Schema\Blueprint;
+use TAO\Callback;
 use TAO\Fields\Field;
 use TAO\Fields\FileField;
 use TAO\Fields\Type\Attaches\Entry;
@@ -279,5 +280,44 @@ class Attaches extends StringField implements \IteratorAggregate
     public function nullValue()
     {
         return [];
+    }
+
+    public function renderableEntries()
+    {
+        return $this->callParam('renderable_entries', function() {
+            return $this->value();
+        });
+    }
+
+    public function renderable()
+    {
+        return $this->callParam('renderable', function() {
+            $entries = $this->renderableEntries();
+            return count($entries)>0;
+        });
+    }
+
+    public function containerClass()
+    {
+        return $this->param('container_class', "b-{$this->type}");
+    }
+
+    public function entryClass()
+    {
+        return $this->param('entry_class', $this->containerClass().'__entry');
+    }
+
+    public function entryTemplate()
+    {
+        return 'fields ~ attaches.entry';
+    }
+
+    protected function defaultContext()
+    {
+        $context = parent::defaultContext();
+        $context['entry_template'] = $this->entryTemplate();
+        $context['entry_class'] = $this->entryClass();
+        $context['container_class'] = $this->containerClass();
+        return $context;
     }
 }

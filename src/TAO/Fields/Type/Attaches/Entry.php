@@ -11,13 +11,19 @@ class Entry implements \ArrayAccess
         $this->data = $data;
     }
 
-    public function path()
+    public function path($mods = false)
     {
+        if ($mods) {
+            return \Images::modify($this->data['path'], $mods);
+        }
         return $this->data['path'];
     }
 
-    public function url()
+    public function url($mods = false)
     {
+        if ($mods) {
+            return \Storage::url($this->path($mods));
+        }
         return $this->data['url'];
     }
 
@@ -29,7 +35,7 @@ class Entry implements \ArrayAccess
     public function ext()
     {
         $name = $this->data['name'];
-        if (\TAO::regexp('{\.([a-z0-9])$}i', $name)) {
+        if ($m = \TAO::regexp('{\.([a-z0-9]+)$}i', $name)) {
             return strtolower($m[1]);
         }
     }
@@ -46,6 +52,19 @@ class Entry implements \ArrayAccess
             return $info->$name;
         }
         return $info;
+    }
+
+    public function previewPath($mods)
+    {
+        if (!$this->isImage()) {
+            return;
+        }
+        return \Images::modify($this->path, $mods);
+    }
+
+    public function previewUrl($mods)
+    {
+        return \Storage::url($this->previewPath($mods));
     }
 
     public function offsetExists($offset)
