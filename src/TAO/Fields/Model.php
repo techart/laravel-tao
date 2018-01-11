@@ -281,7 +281,7 @@ abstract class Model extends \Illuminate\Database\Eloquent\Model
     public function itemsForSelect($args = false)
     {
         $args = Collection::parseString($args);
-        if ($this instanceof \TAO\Fields\Extra\Tree) {
+        if ($this->checkIfTree()) {
             return $this->treeForSelect($args);
         }
         $out = Collection::numericKeysOnly($args);
@@ -330,12 +330,12 @@ abstract class Model extends \Illuminate\Database\Eloquent\Model
     }
 
     /**
-     * Возвращает по ид итем, доступный для чтения текущему пользователю
+     * Возвращает запись по id
      *
      * @param $id
      * @return \Illuminate\Database\Eloquent\Collection|\Illuminate\Database\Eloquent\Model|null|Model|Model[]
      */
-    public function getAccessibleItemById($id)
+    public function getItemById($id)
     {
         return $this->find($id);
     }

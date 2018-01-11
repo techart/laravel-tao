@@ -6,6 +6,7 @@ use Illuminate\Contracts\View\Factory as ViewFactory;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Response;
 use TAO\Fields\Model;
+use TAO\Foundation\Request;
 
 /**
  * Class Selector
@@ -26,7 +27,7 @@ class Selector
     public $data = [];
 
     /**
-     * @return Builder
+     * @return Builder|bool
      */
     public function query()
     {
@@ -38,6 +39,7 @@ class Selector
         if ($this->datatype) {
             return $this->datatype->getAccessibleItems();
         }
+        return false;
     }
 
     /**
@@ -85,7 +87,7 @@ class Selector
                     return false;
                 }
             }
-            $finder = isset($base['finder']) ? $base['finder'] : 'getAccessibleItemByUrl';
+            $finder = isset($base['finder']) ? $base['finder'] : 'getItemByUrl';
             $item = \TAO::datatype($base['url_of'])->$finder($url);
             if ($item instanceof \Illuminate\Database\Eloquent\Builder) {
                 $item = $item->first();
@@ -95,6 +97,7 @@ class Selector
                 return true;
             }
         }
+        return false;
     }
 
     /**
@@ -104,6 +107,9 @@ class Selector
     public function route($data = [])
     {
         $this->data = $data;
+        /**
+         * @var Request $request
+         */
         $request = app()->request();
         $url = $urlSrc = $request->getPathInfo();
 

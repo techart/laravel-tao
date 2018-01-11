@@ -17,10 +17,6 @@ abstract class PageModel extends Model
         \TAO\Fields\Extra\Title,
         \TAO\Fields\Extra\Metas;
 
-    use \TAO\Fields\Extra\Addressable {
-        getAccessibleItemByUrl as private parentAccessibleItemByUrl;
-    }
-
     /**
      *
      */
@@ -41,27 +37,15 @@ abstract class PageModel extends Model
             'params' => 'Доп.параметры',
         );
     }
-
     /**
-     * Переопределяем стандартные методы, т.к. нужно учитывать isactive
+     * Проверка прав доступа на просмотр страницы записи
      *
-     * @param $url
-     * @return null|Model
+     * @param bool $user
+     * @return mixed
      */
-    public function getAccessibleItemByUrl($url)
+    public function accessView($user = false)
     {
-        $item = $this->parentAccessibleItemByUrl($url);
-        return (is_object($item) && $item->isactive)? $item : null;
-    }
-
-    /**
-     * @param $id
-     * @return null|Model
-     */
-    public function getAccessibleItemById($id)
-    {
-        $item = parent::getAccessibleItemById($id);
-        return $item->isactive? $item : null;
+        return $this->isactive;
     }
 
     /**

@@ -2,6 +2,12 @@
 
 namespace TAO\Fields\Extra;
 
+/**
+ * Trait Switchable
+ * @package TAO\Fields\Extra
+ *
+ * @property bool $isactive
+ */
 trait Switchable
 {
     public function initExtraSwitchable()

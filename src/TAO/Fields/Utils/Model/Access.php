@@ -13,6 +13,7 @@ trait Access
 
     protected $groupAdmin = false;
     protected $groupAdminEdit = false;
+    protected $groupEdit = false;
 
     /**
      *
@@ -110,5 +111,17 @@ trait Access
             $user = \Auth::user();
         }
         return $this->accessEdit($user);
+    }
+
+    /**
+     *
+     * Может ли текущий или переданный юзер просматривать текущую запись
+     *
+     * @param $user [optional]
+     * @return mixed
+     */
+    public function accessView($user = false)
+    {
+        return true;
     }
 }

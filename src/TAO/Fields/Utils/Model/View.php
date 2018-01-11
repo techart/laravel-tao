@@ -3,8 +3,16 @@
 namespace TAO\Fields\Utils\Model;
 
 use Illuminate\Contracts\View\Factory as ViewFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Response;
+use TAO\Fields\Field;
 
+/**
+ * Trait View
+ * @package TAO\Fields\Utils\Model
+ *
+ * @method Field field($name, $forceType = false)
+ */
 trait View
 {
     public function findView($name, $default = 'tao::no-view-for')
@@ -24,36 +32,36 @@ trait View
         return $default;
     }
 
-    public function renderListPage1($data = [])
-    {
-        $data['page'] = $page = isset($data['page']) ? $data['page'] : 1;
-        $data['per_page'] = $perPage = isset($data['per_page']) ? $data['per_page'] : 10;
-        $data['mode'] = $mode = isset($data['mode']) ? $data['mode'] : 'list';
-        $data['listing'] = $selector = isset($data['listing']) ? $data['listing'] : 'getAccessibleItems';
-        $data['pager_callback'] = isset($data['pager_callback']) ? $data['pager_callback'] : [$this, 'listUrl'];
-        if (isset($data['base'])) {
-            $this->baseListUrl('/' . $data['base'] . '/');
-        }
-        $view = $this->findView($data['mode']);
-
-        $select = $this->$selector();
-        $count = $select->count();
-        $numPages = ceil($count / $perPage);
-        $rows = [];
-        foreach ($select->limit($perPage)->offset(($page - 1) * $this->perPage)->get() as $row) {
-            $rows[] = $row;
-        }
-
-        $data['count'] = $count;
-        $data['numpages'] = $numPages;
-        $data['rows'] = $rows;
-        $data['model'] = $this;
-        $data['item'] = $this;
-        if (!isset($data['title'])) {
-            $data['title'] = $this->adminMenuTitle();
-        }
-        return view($view, $data);
-    }
+//    public function renderListPage1($data = [])
+//    {
+//        $data['page'] = $page = isset($data['page']) ? $data['page'] : 1;
+//        $data['per_page'] = $perPage = isset($data['per_page']) ? $data['per_page'] : 10;
+//        $data['mode'] = $mode = isset($data['mode']) ? $data['mode'] : 'list';
+//        $data['listing'] = $selector = isset($data['listing']) ? $data['listing'] : 'getAccessibleItems';
+//        $data['pager_callback'] = isset($data['pager_callback']) ? $data['pager_callback'] : [$this, 'listUrl'];
+//        if (isset($data['base'])) {
+//            $this->baseListUrl('/' . $data['base'] . '/');
+//        }
+//        $view = $this->findView($data['mode']);
+//
+//        $select = $this->$selector();
+//        $count = $select->count();
+//        $numPages = ceil($count / $perPage);
+//        $rows = [];
+//        foreach ($select->limit($perPage)->offset(($page - 1) * $this->perPage)->get() as $row) {
+//            $rows[] = $row;
+//        }
+//
+//        $data['count'] = $count;
+//        $data['numpages'] = $numPages;
+//        $data['rows'] = $rows;
+//        $data['model'] = $this;
+//        $data['item'] = $this;
+//        if (!isset($data['title'])) {
+//            $data['title'] = $this->adminMenuTitle();
+//        }
+//        return view($view, $data);
+//    }
 
     /**
      * Рендер детальной страницы итема.
@@ -61,8 +69,8 @@ trait View
      *
      * 1. Сам объект итема
      * 2. Массив, в котором есть элемент item
-     * 3. Массив, в котором есть элемент id (в этом случае для чтения итема вызывается метод getAccessibleItemById)
-     * 3. Массив, в котором есть элементы id и finder (имя метода вместо getAccessibleItemById)
+     * 3. Массив, в котором есть элемент id (в этом случае для чтения итема вызывается метод getItemById)
+     * 3. Массив, в котором есть элементы id и finder (имя метода вместо getItemById)
      *
      * Если итема нет (не пришел и не найден), то отдается 404
      * Если итем найден, то он рендерится через метод render.
@@ -79,7 +87,7 @@ trait View
         if (isset($data['item'])) {
             $item = $data['item'];
         } else {
-            $finder = isset($data['finder']) ? $data['finder'] : 'getAccessibleItemById';
+            $finder = isset($data['finder']) ? $data['finder'] : 'getItemById';
             $id = isset($data['id']) ? $data['id'] : 0;
             $item = $this->$finder($id);
         }
@@ -97,7 +105,7 @@ trait View
      * Рендер итема, в контексте которого вызываатся
      *
      * @param array $data
-     * @return ViewFactory|\Illuminate\View\View|void
+     * @return ViewFactory|\Illuminate\View\View|array|Response|string
      */
     public function render($data = [])
     {
@@ -126,6 +134,8 @@ trait View
      *
      * @param $data - данные, передаваемые в шаблон
      * @param $view - имя шаблона
+     *
+     * @return string|Response|array|void
      */
     protected function beforeRender($data, $view)
     {

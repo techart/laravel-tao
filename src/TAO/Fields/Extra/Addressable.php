@@ -1,7 +1,11 @@
 <?php
 
 namespace TAO\Fields\Extra;
-use Illuminate\Database\Query\Builder;
+
+use TAO\Fields\Field;
+use TAO\Fields\Model;
+use TAO\Fields\PageModel;
+use TAO\Foundation\Request;
 
 /**
  * Trait Addressable
@@ -9,6 +13,8 @@ use Illuminate\Database\Query\Builder;
  *
  * Трейт для моделей, могущих откликаться по урлу, заданному в админке, а также по дефолтному урлу
  *
+ * @method Field field($name, $forceType = false)
+ * @method $this where(string | array | \Closure $column, string $operator = null, mixed $value = null, string $boolean = 'and')
  */
 trait Addressable
 {
@@ -32,23 +38,22 @@ trait Addressable
      *
      * @return string
      */
-    public function url()
+    public function url($mode = 'full')
     {
         $url = trim($this->field('url')->value());
         if ($url == '') {
-            return $this->defaultUrl($this);
+            return $this->defaultUrl($this, $mode);
         }
         return $url;
     }
 
     /**
-     * Возвращает по урлу (заданнму в адмике) итем, доступный на чтение текущему пользователю
-     * Если нужно разграничивать доступ, то следует переопределить в конкретной модели
+     * Возвращает запись по урлу (заданному в админке)
      *
      * @param $url
      * @return mixed
      */
-    public function getAccessibleItemByUrl($url)
+    public function getItemByUrl($url)
     {
         return $this->where('url', $url)->first();
     }
@@ -60,7 +65,7 @@ trait Addressable
      * @param Model|string $item
      * @return string
      */
-    public function defaultUrl($item)
+    public function defaultUrl($item, $mode = 'full')
     {
         $id = is_object($item) ? $item->getKey() : $item;
         $url = '/' . $this->getDatatype() . "/{$id}/";
@@ -71,7 +76,7 @@ trait Addressable
      * Роутинг дататайпа по урлу, заданному в админке
      *
      * $data - параметры роутинга: (в примере рассматриваем урл /russia/moscow/)
-     * - finder:    имя метода, который будет искать итем по урлу (по умолчанию - getAccessibleItemByUrl)
+     * - finder:    имя метода, который будет искать итем по урлу (по умолчанию - getItemByUrl)
      * - pages:     если задан, то урл может быть многостраничным (/russia/moscow/page-1/ и т.д.). Номер страницы передается в Model::renderItemPage
      * - prefix:    префикс урла. Например - если задан news, то сработает /news/russia/moscow/
      * - postfix:   постфикс урла. Например - если задан shops, то сработает /russia/moscow/shops/
@@ -82,10 +87,12 @@ trait Addressable
      */
     public function routePageByUrl($data = [])
     {
+        /**
+         * @var Request $request
+         */
         $request = app()->request();
         $url = $urlSrc = $request->getPathInfo();
 
-        $page = 1;
         if (isset($data['pages']) || isset($data['listing'])) {
             if ($m = \TAO::regexp("{^(.+)/page-(\d+)/$}", $url)) {
                 $url = $m[1] . '/';
@@ -111,7 +118,7 @@ trait Addressable
             }
         }
 
-        $finder = isset($data['finder']) ? $data['finder'] : 'getAccessibleItemByUrl';
+        $finder = isset($data['finder']) ? $data['finder'] : 'getItemByUrl';
         $mode = isset($data['mode']) ? $data['mode'] : 'full';
         $item = $this->$finder($url);
         if ($item instanceof \Illuminate\Database\Eloquent\Builder) {
@@ -121,7 +128,16 @@ trait Addressable
             $data['item'] = $item;
             $data['mode'] = $mode;
             \Route::any($urlSrc, function () use ($item, $data) {
-                return $this->renderItemPage($data);
+                /**
+                 * @var PageModel $item
+                 * @var array $data
+                 */
+                if ($item->accessView(\Auth::user())) {
+                    $response = $this->renderItemPage($data);
+                } else {
+                    $response = \TAO::pageNotFound();
+                }
+                return $response;
             });
         }
         return $this;
@@ -133,25 +149,33 @@ trait Addressable
      *
      * @return $this
      */
-    public function routePageById()
+    public function routePageById($data = [])
     {
-        $url = $this->defaultUrl('{id}');
+        $mode = isset($data['mode']) ? $data['mode'] : 'full';
+        $url = isset($data['url']) ? $data['url'] : $this->defaultUrl('{id}', $mode);
 
-        \Route::any($url, function ($id) {
-            $item = $this->getAccessibleItemById($id);
-            if (!$item) {
-                return response(view('404', 404));
+        \Route::any($url, function ($id) use ($mode, $data) {
+            /** @var PageModel $item */
+            $item = $this->getItemById($id);
+            if (!$item || !$item->accessView(\Auth::user())) {
+                return \TAO::pageNotFound();
             }
 
-            $itemUrl = $item->url();
-            $request = app()->request();
+            $redirect = isset($data['redirect_to_valid_url']) ? $data['redirect_to_valid_url'] : false;
 
-            $url = $request->getPathInfo();
-            if ($url != $itemUrl) {
-                return \Redirect::away($itemUrl, 301);
+            if ($redirect) {
+                $itemUrl = $item->url($mode);
+                /** @var Request $request */
+                $request = app()->request();
+                $url = $request->getPathInfo();
+                if ($url != $itemUrl) {
+                    return \Redirect::away($itemUrl, 301);
+                }
             }
 
-            return $this->renderItemPage($item);
+            $data['item'] = $item;
+            $data['mode'] = $mode;
+            return $this->renderItemPage($data);
         })->where('id', '^\d+$');
 
         return $this;

@@ -3,5 +3,5 @@
   name="{{ $field->name }}"
   class="input text {{ $field->classForInput() }}"
   style="{!! $field->styleForInput() !!}"
->{{ $item[$field->name] }}
+>{{ htmlspecialchars($item[$field->name]) }}
 </textarea>
