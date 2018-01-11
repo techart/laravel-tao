@@ -1,3 +1,3 @@
 <td>
-    {{ $field->renderForAdminList() }}
+    {!! $field->renderForAdminList() !!}
 </td>

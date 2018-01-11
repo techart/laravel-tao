@@ -49,6 +49,17 @@ trait Table
         }
         return $this->filterFields;
     }
+    
+    protected function filterFormFields()
+    {
+        $out = [];
+        foreach($this->filterFields() as $name => $field) {
+            if ($field->param('in_filter_form', true)) {
+                $out[$name] = $field;
+            }
+        }
+        return $out;
+    }
 
     protected function filterValues()
     {
@@ -159,7 +170,7 @@ trait Table
             return $this->treeAction();
         }
 
-        $filter = $this->filterFields();
+        $filter = $this->filterFormFields();
 
         $count = $this->countRows();
         $numPages = ceil($count / $this->perPage());
