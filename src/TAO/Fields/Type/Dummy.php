@@ -19,4 +19,12 @@ class Dummy extends Field
     public function setFromRequestAfterSave($request)
     {
     }
+    
+    public function set($value)
+    {
+    }
+    
+    public function rawValue()
+    {
+    }
 }
