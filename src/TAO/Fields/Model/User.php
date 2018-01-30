@@ -3,6 +3,7 @@
 namespace TAO\Fields\Model;
 
 use Illuminate\Notifications\Notifiable;
+
 //use TAO\Fields\Model\AbstractUser;
 
 class User extends AbstractUser
@@ -37,4 +38,10 @@ class User extends AbstractUser
         return \TAO\Users\LoginController::class;
     }
 
+    public function registerController()
+    {
+        return \TAO\Users\RegisterController::class;
+    }
 }
+
+

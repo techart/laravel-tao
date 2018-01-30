@@ -1,6 +1,6 @@
 <?php
 
-namespace TAO\Comments;
+namespace TAO\Components\Comments;
 
 use Illuminate\Database\Eloquent\Builder;
 

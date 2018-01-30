@@ -26,6 +26,13 @@ class Selector
     public $args = [];
     public $data = [];
 
+
+    public function setMnemocode($code)
+    {
+        $this->mnemocode = $code;
+        return $this;
+    }
+
     /**
      * @return Builder|bool
      */
@@ -106,7 +113,12 @@ class Selector
      */
     public function route($data = [])
     {
+        if (isset($data['url']) && !isset($data['base'])) {
+            $data['base'] = $data['url'];
+        }
         $this->data = $data;
+
+
         /**
          * @var Request $request
          */
@@ -203,9 +215,10 @@ class Selector
         $this->data['mode'] = $mode = isset($this->data['mode']) ? $this->data['mode'] : 'page';
         $this->data['row_mode'] = isset($this->data['row_mode']) ? $this->data['row_mode'] : 'teaser';
         $this->data['title'] = $this->title();
+        $this->data['selector'] = $this;
         $query = $this->query();
         if (!$query) {
-            return response(view('404'), 404);
+            return view('tao::no-query-for-selector', $this->data);
         }
         if (is_string($query) || $query instanceof Response) {
             return $query;
@@ -219,7 +232,6 @@ class Selector
         $this->data['count'] = $count;
         $this->data['numpages'] = $numPages;
         $this->data['rows'] = $rows;
-        $this->data['selector'] = $this;
         $template = isset($this->data['template']) ? $this->data['template'] : $this->defaultTemplate($mode);
 
         $this->beforeRender();

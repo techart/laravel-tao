@@ -221,6 +221,11 @@ class Multilink extends Field
         }
         return $this->relatedItems;
     }
+
+    public function attachedItems()
+    {
+        return $this->relatedItems();
+    }
     
     public function attached()
     {

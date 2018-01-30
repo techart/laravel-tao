@@ -82,6 +82,16 @@ abstract class AbstractUser extends AbstractModel implements
                 'in_form' => true,
                 'group' => 'access.roles',
             ),
+            'social' => array(
+                'type' => 'string(20)',
+                'in_list' => false,
+                'in_form' => false,
+            ),
+            'social_info' => array(
+                'type' => 'text',
+                'in_list' => false,
+                'in_form' => false,
+            ),
         );
         return $fields;
     }
@@ -131,6 +141,14 @@ abstract class AbstractUser extends AbstractModel implements
      * @param array $data
      */
     public function setupAfterExtraAuth2($data = [])
+    {
+    }
+    
+    public function setupAfterSocialAuth($data)
+    {
+    }
+    
+    public function setupAfterSocialAuth2($data)
     {
     }
 

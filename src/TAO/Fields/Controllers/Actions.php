@@ -34,11 +34,11 @@ trait Actions
      */
     public function entryPointAction()
     {
-        $this->action = \Request::has('action') ? \Request::input('action') : 'list';
-        $this->filter = \Request::has('filter') ? \Request::input('filter') : array();
-        $this->order = \Request::has('order') ? \Request::input('order') : array();
-        $this->page = \Request::has('page') ? (int)\Request::input('page') : 1;
-        $this->id = \Request::has('id') ? \Request::input('id') : null;
+        $this->action = \Request::get('action', 'list');
+        $this->filter = \Request::get('filter', array());
+        $this->order = \Request::get('order', array());
+        $this->page = \Request::get('page', 1);
+        $this->id = \Request::get('id', null);
         $method = "{$this->action}Action";
 
         return $this->$method();

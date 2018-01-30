@@ -55,6 +55,13 @@ class Application extends \Illuminate\Foundation\Application
         return $this->taoRequest;
     }
 
+    public function modifyRequest()
+    {
+        if ($urls = \TAO::datatype('urlrewriter', false)) {
+            $this->taoRequest = $urls->modifyRequest($this->request());
+        }
+    }
+
     /**
      * @return null
      */

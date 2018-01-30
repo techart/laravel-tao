@@ -35,6 +35,7 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function map()
     {
+        app()->modifyRequest();
         $this->mapApiRoutes();
         $this->mapWebRoutes();
     }

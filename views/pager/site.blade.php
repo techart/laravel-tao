@@ -8,7 +8,8 @@
 
 
 @if ($page>1)
-  @include('pager ~ link', ['number' => $page-1, 'text' => '&lt;'])
+  {{ Assets::setMeta('rel_canonical', call_user_func($pager_callback, 1)) }}
+  @include('pager ~ link', ['number' => $page-1, 'text' => '&lt;', 'link_rel' => 'prev'])
 @endif
 
 @if ($p1>1)
@@ -33,5 +34,5 @@
 @endif
 
 @if ($page<$numpages)
-  @include('pager ~ link', ['number' => $page+1, 'text' => '&gt;'])
+  @include('pager ~ link', ['number' => $page+1, 'text' => '&gt;', 'link_rel' => 'next'])
 @endif

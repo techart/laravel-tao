@@ -11,4 +11,6 @@
   </label>
   <button class="btn btn-large btn-primary" type="submit">Вход</button>
 </form>
+<a href="/login/social/yandex/">Y</a>
+<a href="/users/register/">Reg</a>
 @endsection

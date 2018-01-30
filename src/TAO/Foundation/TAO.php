@@ -2,10 +2,12 @@
 
 namespace TAO\Foundation;
 
+use TAO\Exception\UnknownSelector;
 use TAO\Fields\Model;
 use TAO\Frontend\Manager;
 use TAO\Navigation;
 use TAO\Router;
+use TAO\Exception\UnknownDatatype;
 
 class TAO
 {
@@ -31,6 +33,7 @@ class TAO
     protected $datatypes = null;
     protected $controller;
     protected $inAdmin = false;
+    protected $selectors = [];
 
     public function useLayout($name)
     {
@@ -133,9 +136,21 @@ class TAO
             $controller = '\\' . $datatype->loginController();
             $urlLogin = $datatype->loginUrl();
             \Route::get($urlLogin, "{$controller}@showLoginForm");
-            \Route::post($urlLogin, array('as' => 'login', 'uses' => "{$controller}@login"));
+            \Route::post($urlLogin, array('as' => 'login', 'uses' => "{$controller}@login"))->name('login');
             \Route::get('/users/logout/', "{$controller}@logout");
+            \Route::get('/login/social/{driver}/', "{$controller}@redirectToProvider");
+            \Route::get('/login/social/{driver}/callback/', "{$controller}@handleProviderCallback");
+        }
 
+        if (config('auth.public.register', false)) {
+            /**
+             * @var Model\User $datatype
+             */
+            $datatype = \TAO::datatype('users');
+            $controller = '\\' . $datatype->registerController();
+            $urlRegister = '/users/register/';
+            \Route::get($urlRegister, "{$controller}@showRegistrationForm");
+            \Route::post($urlRegister, "{$controller}@register")->name('register');
         }
 
         foreach (array_keys($this->routers()) as $name) {
@@ -190,11 +205,14 @@ class TAO
      * @return string
      * @throws \UnknownDatatype
      */
-    public function datatypeClass($name)
+    public function datatypeClass($name, $default = null)
     {
         $datatypes = $this->datatypeClasses();
         if (!isset($datatypes[$name])) {
-            throw new \UnknownDatatype($name);
+            if (is_null($default)) {
+                throw new UnknownDatatype($name);
+            }
+            return $default;
         }
         return $datatypes[$name];
     }
@@ -204,11 +222,14 @@ class TAO
      * @return Model
      * @throws \UnknownDatatype
      */
-    public function datatype($name)
+    public function datatype($name, $default = null)
     {
-        $class = $this->datatypeClass($name);
+        $class = $this->datatypeClass($name, false);
         if (empty($class)) {
-            throw new \UnknownDatatype($name);
+            if (is_null($default)) {
+                throw new UnknownDatatype($name);
+            }
+            return $default;
         }
         return app()->make($class);
     }
@@ -250,6 +271,38 @@ class TAO
             }
         }
         return $class;
+    }
+
+    public function addSelector($code, $class)
+    {
+        $this->selectors[$code] = $class;
+    }
+
+    public function selector($code, $default = null)
+    {
+        if (isset($this->selectors[$code])) {
+            $class = $this->selectors[$code];
+            if (is_object($class)) {
+                return $class;
+            }
+            return app()->make($class)->setMnemocode($code);
+        }
+
+        $class = config("tao.selectors.{$code}");
+        if ($class) {
+            return app()->make($class)->setMnemocode($code);
+        }
+
+        $datatype = static::datatype($code, false);
+        if ($datatype) {
+            return $datatype->selector();
+        }
+
+        if (!is_null($default)) {
+            return $default;
+        }
+
+        throw new UnknownSelector($code);
     }
 
     public function publicPath()

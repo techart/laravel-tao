@@ -25,6 +25,7 @@ class EventServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        $this->listen = \TAO::merge($this->listen, config('events', []));
         parent::boot();
 
         //

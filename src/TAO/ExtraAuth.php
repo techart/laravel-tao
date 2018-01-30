@@ -17,6 +17,7 @@ class ExtraAuth {
                 $user->field('name')->set($name);
                 $user->field('email')->set($email);
                 $user->field('password')->set(bcrypt('~'));
+                $user->field('social')->set('*extra');
                 $user->setupAfterExtraAuth($result);
                 $user->save();
                 $user->setupAfterExtraAuth2($result);

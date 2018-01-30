@@ -60,12 +60,12 @@ class Urls
     public static function isCurrentStartsWith($url)
     {
         $url = self::clean($url);
-        if (strpos(self::clean($_SERVER['REQUEST_URI']),$url)===0) {
+        if (strpos(self::clean($_SERVER['REQUEST_URI']), $url) === 0) {
             return true;
         }
 
         foreach (self::$currentUrls as $curl) {
-            if (strpos($curl, $url)===0) {
+            if (strpos($curl, $url) === 0) {
                 return true;
             }
         }
@@ -81,5 +81,39 @@ class Urls
             $uri = $m[1];
         }
         return $uri;
+    }
+
+    /**
+     * Сортирует по алфавиту GET-параметры в урле
+     *
+     * @param $url
+     * @return string
+     *
+     */
+    public static function sortUrl($url)
+    {
+        $data = parse_url($url);
+        $path = isset($data['path']) ? $data['path'] : '/';
+        $query = isset($data['query']) ? $data['query'] : '';
+        parse_str($query, $qdata);
+        self::recursiveKsort($qdata);
+        $query = http_build_query($qdata);
+        $query = str_replace('%5B', '[', $query);
+        $query = str_replace('%5D', ']', $query);
+        $url = $path;
+        if (!empty($query)) {
+            $url .= "?{$query}";
+        }
+        return $url;
+    }
+
+    protected static function recursiveKsort(&$m)
+    {
+        if (is_array($m)) {
+            ksort($m);
+            foreach ($m as $key => &$v) {
+                self::recursiveKsort($v);
+            }
+        }
     }
 }

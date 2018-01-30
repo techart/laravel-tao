@@ -7,6 +7,10 @@ class Assets
     protected $meta = array();
     protected $scopes = array();
     protected $textBlocks = array();
+    protected $urlRewrited;
+    protected $originalRequest;
+    protected $needRedirectTo;
+    protected $needRedirectType;
 
     public function init()
     {
@@ -29,7 +33,25 @@ class Assets
 
     public function renderMeta()
     {
+        foreach (['title', 'description', 'keywords'] as $name) {
+            if (!empty($value = $this->getParam("meta_{$name}"))) {
+                $this->setMeta($name, $value);
+            }
+        }
         return view('tao::meta', array('meta' => $this->meta));
+    }
+
+    public function getParam($name, $default = null)
+    {
+        if (is_object($item = $this->urlRewrited)) {
+            if (isset($item[$name])) {
+                $value = trim($item[$name]);
+                if (!empty($value)) {
+                    return $value;
+                }
+            }
+        }
+        return $default;
     }
 
     public function meta()
@@ -187,4 +209,34 @@ class Assets
     {
         $this->frontend()->useScript($name, $params);
     }
+
+    public function urlRewrited($item = false, $request = false)
+    {
+        if ($item) {
+            $this->urlRewrited = $item;
+        }
+        if (is_object($request)) {
+            $this->originalRequest = clone $request;
+        }
+        return $this->urlRewrited;
+    }
+
+    public function getOriginalRequest()
+    {
+        return $this->originalRequest;
+    }
+
+    public function needRedirect($to, $type)
+    {
+        $this->needRedirectTo = $to;
+        $this->needRedirectType = $type;
+    }
+
+    public function redirectIfNeed()
+    {
+        if (!empty($this->needRedirectTo)) {
+            return redirect($this->needRedirectTo, $this->needRedirectType);
+        }
+    }
+
 }
