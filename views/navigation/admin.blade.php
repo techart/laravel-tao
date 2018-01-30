@@ -6,7 +6,7 @@
         @elseif($link->hasGrantedChilds())
             <li class="dropdown">
                 <a href="{{ url($link->url) }}" data-toggle="dropdown" class="dropdown-toggle">{{ $link->title }} <b class="caret"></b></a>
-                {!! $link->render('ul', ['args' => 'class="dropdown-menu"']) !!}
+                {!! $link->render('ul', ['args' => 'class="dropdown-menu"', 'is_admin' => true]) !!}
             </li>
         @endif
     @endif

@@ -66,7 +66,7 @@ abstract class PageModel extends Model
     /**
      * Строка даты для генерации урла по шаблону
      */
-    protected function dateForUrl()
+    public function dateForUrl()
     {
         return empty($this->created_at)? date('Y/m/d') : $this->created_at->format('Y/m/d');
     }

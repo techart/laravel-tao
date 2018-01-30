@@ -1,1 +1,1 @@
-<a href="{!! url($link->url) !!}">{{ $link->title }}</a>
+<{{ $link->tag() }} class="{{ $link->class() }}" href="{!! url($link->url) !!}">{{ $link->title }}</{{ $link->tag() }}>

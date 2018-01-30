@@ -54,7 +54,7 @@ class Navigation
      * @var null
      */
     protected $access = null;
-
+    
     /**
      * @var string
      */
@@ -497,6 +497,28 @@ class Navigation
     public function withDivider()
     {
         return isset($this->data['divider']) && $this->data['divider'];
+    }
+    
+    public function tag()
+    {
+        if ($this->isCurrent()) {
+            $check = config('tao.navigation.check_tag');
+            if ($check) {
+                if (substr($this->url, 0, 6) != '/admin') {
+                    return 'div';
+                }
+            }
+        }
+        return 'a';
+    }
+    
+    public function class()
+    {
+        $class = 'a';
+        if ($this->isSelected()) {
+            $class .= ' selected';
+        }
+        return $class;
     }
 
     /**
