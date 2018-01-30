@@ -57,12 +57,17 @@ trait Events
         }
         return parent::fireModelEvent($event, $halt);
     }
+    
+    protected function generateUrl()
+    {
+    }
 
     /**
      *
      */
     final public function immutableBeforeSave()
     {
+        $this->generateUrl();
     }
 
     /**
